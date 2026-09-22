@@ -1,0 +1,95 @@
+#!/bin/sh
+
+# Make an AIX shared library (tricky!!!)
+# Based on a script from Athanasios G. Gaitatzes (gaitat@vnet.ibm.com)
+
+
+# First argument is name of output library
+# Rest of arguments are object files
+
+
+# Name of the library which clients will link with (ex: libMesaGL.a)
+LIBRARY=$1
+
+# BASENAME = LIBRARY without .a suffix
+BASENAME=`echo ${LIBRARY} | sed "s/\.a//g"`
+
+# Name of exports file
+EXPFILE=${BASENAME}.exp
+
+# Name of temporary shared lib file
+OFILE=shr.o
+####OFILE=${BASENAME}.o
+
+# List of object files to put into library
+shift 1
+OBJECTS=$*
+
+
+# Remove any old files from previous make
+rm -f ${LIBRARY} ${EXPFILE} ${OFILE}
+
+
+# Determine how to invoke nm depending on AIX version
+AIXVERSION=`uname -v`
+case ${AIXVERSION}
+{
+	3*)
+		NM=/usr/ucb/nm
+		;;
+	4*)
+		NM=/usr/bin/nm -B
+		;;
+	*)
+		echo "Error in mklib.aix!"
+		exit 1
+		;;
+}
+
+
+
+
+# Other libraries which we may be dependent on.  Since we make the libraries
+# in the order libMesaGL.a, libMesaGLU.a, libMesatk.a, libMesaaux.a each
+# just depends on its predecessor.
+OTHERLIBS=`ls ../lib/lib*.a`
+
+##echo OTHERLIBS are ${OTHERLIBS}
+
+
+
+
+# Make exports (.exp) file header
+echo "#! ${LIBRARY}" > ${EXPFILE}
+echo "noentry" >> ${EXPFILE}
+
+# Append list of exported symbols to exports file
+${NM} ${OBJECTS} | awk '/ [BD] /{print $3}' | sort | uniq >> ${EXPFILE}
+
+
+# This next line is a hack to allow full compatibility with IBM's OpenGL
+# libraries.  IBM mistakenly exports glLoadIdentity from the libGLU.a
+# library.  We have to do the same thing.  Problem reported by Yemi Adesanya
+# (adesanya@afsmail.cern.ch) and Patrick Brown (pbrown@austin.ibm.com)
+if [ "${BASENAME}" = libMesaGLU ] ; then
+    echo "glLoadIdentity" >> ${EXPFILE}
+fi
+
+
+# Make the shared lib file
+cc -o ${OFILE} ${OBJECTS} -L../lib ${OTHERLIBS} -lX11 -lm -lc -bE:${EXPFILE} -bM:SRE -enoentry
+
+
+# Make the .a file
+ar ruv ${LIBRARY} ${OFILE}
+
+# Put exports file in Mesa lib directory
+mv ${EXPFILE} ../lib
+
+# Remove OFILE
+rm -f ${OFILE}
+
+
+#NOTES
+# AIX 4.x /usr/bin/nm -B patch from ssclift@mach.me.queensu.ca (Simon Clift)
+

@@ -1,0 +1,149 @@
+AMIGA PORT of MESA: THE OPENGL SOFTWARE EMULATION
+=================================================
+
+     1.0 WARNING This code is still beta and will in some cases crash your
+         computer.  PLEASE Don't run anything important when you test it.
+         (Now you have been warned)
+
+When I first read about OPENGL in the summer of 1995 I was happy and filled with
+joy. A few days later I surfed to the mesa homepage but only to discover that 
+there was no Amiga version. In the beginning of 1996 someone released a AMIWIN
+version so I took the archive home to try it out, but it stayed packed on my HD.
+One day when I was home and poking around with my HD I saw the archive and
+started to try to make it work. Without luck as it seemed that you needed 
+the AMIWIN Includes and LIBFILES. But I also discovered that it was possible
+to port it with not to much effort (WRONG THERE) so I begun.
+
+For the Amiga there is only three important files + one directory.
+
+src/Amigamesa.c		The mesa GL Amiga implementation 
+			(ddsample.c with some Amiga code)
+src-tk/Awindow.c 	The tk (and aux) machine specific code)
+include/GL/Amigamesa.h 	The prototypes for Amigamesa
+
+Amiga/#?
+
+
+Compiling
+=========
+Just execute mklib.amiga
+
+
+About the code.
+===============
+The Code is compiled with cpu=020 math=ieee 
+If you would like it different then use the /Amiga/scoptions and if you change
+the math you have to change it to link with it in all smakefile
+
+All pen allocations are made with obtain best pen. So if you alloc 256 pens
+in a 2-depth screen your will loose some colour but the code should work.
+
+In this state it only renders on a window on a up-to 256 col display but I
+have planes to port it to CyberGFX the problem is that I don't own a gfx-card
+so this is very low on my priority list, this could change if I had one :)
+
+all tk actions in tkExec are not finished.
+but most of them is
+
+Most of the examples work.
+
+etc. etc.
+
+Write your own OpenGL code
+==========================
+1. For a easy start look at the examples in book and modify them
+
+until The shared library is ready you have to define AMIGALIB when
+using <GL/gl.h>
+
+2. For a better amigaproggy just open a window (on your favourite screen) and
+   add a few lines in your source:
+
+-----------------------------------------------------------------------------
+/* ADD where you want it  */
+#include <GL/gl.h>
+
+Init()       /* sets up viewport and projections */
+  {
+  glMatrixMode (GL_PROJECTION);    /*  prepare for and then */ 
+  glLoadIdentity ();		   /*  define the projection */
+  glFrustum (-1.0, 1.0, -1.0, 1.0, 1.5, 20.0);/*  transformation */
+  glMatrixMode (GL_MODELVIEW);	/*  back to modelview matrix*/
+  glViewport (0, 0, 200, 200);	/*  define the viewport		*/
+}   /*        ^  ^  ^^^  ^^^--- The size of the mesa/openGL window  */
+   
+
+
+/* ADD In after you opened your window */
+
+struct amigamesa_context *glcont;
+glcont=AmigaMesaCreateContext(My window pointer,GL_FALSE,GL_FALSE);  
+/*                               your windowprt,RGB-mode,doublebuffered */ 
+if (glcont)
+ {
+ AmigaMesaMakeCurrent(glcont);
+ Init();
+ /* All your ourrage gl comands */
+ /*handle_window_events(test_window);  or whatever */
+ AmigaMesaDestroyContext(glcont);
+}
+
+/* Don't forget to call glViewport() when you resize the window */
+------------------------------------------------------------------------------
+if you set doublebuff to GL_TRUE then you just switch buffer with
+AmigaMesaSwapBuffers();
+
+For more info of the internal you can check the files
+  src/Amigamesa.c and include/GL/Amigamesa.h for tk check src-tk/Awindow.c
+
+LATEST VERSION:
+===============
+
+http://www.efd.lth.se/~d94sz/amesa
+
+
+FUTURE:
+=======
+The API will probably change a little.( Long names -> shorter ex
+           AmigaMesaDestroyContext renames to MesaDestroyContext...)
+Now GLDouble is float due to shared library registers and that's not good.
+A shared library would be nice. (I have started)
+Faster and better. (I have a few ideas)
+CyberGFX support. (I don't have CyberGFX myself any offer to
+                   give me one would result in CyberGFX support :)
+
+HISTORY:
+========
+      
+Release:
+0.8 This code worked with Mesa 1.2.6 and all makefiles also.
+    Due to when I released it Mesa 1.2.7 was released and some changes was made
+    it didn't work.
+
+0.9 Makefiles is remapped to work with Mesa 1.2.7.
+    Double buffering works.
+    Implemented fast_poly_draw (big speed improvement).
+    tkExec a few more tests were done. (right & middle mousebutton is not
+    implemented)
+
+1.0 I've put a common scoption file in /Amiga (thanks to Kamil Iskra).
+    Due to the common scoptions you could change CPU and math more easy ,and
+    compiler options set to default math=ieee, cpu=020 so that it works on 
+    1200's and up 
+    Many bugfixes (thanks to Daniel Jönsson).
+    Have fixed the smakefile name collision with AMIWIN version.
+    Mesa 1.2.8 Fixed.
+    Spellcorrection of the docs were made by Peter Sandén.
+    All tk's windows are opened on a pubscreen named "MESA" if it exists.
+
+Please contact me with suggestions and additional info. 
+You can reach me at: 
+
+d94sz@efd.lth.se
+
+Or mail:
+
+Stefan Zivkovic
+Kämnärsv. 2:216
+226 45 LUND
++46 46 396997

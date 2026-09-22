@@ -1,0 +1,81 @@
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+accum.o: context.h ../include/GL/gl.h config.h dd.h list.h macros.h
+alpha.o: context.h ../include/GL/gl.h config.h list.h macros.h
+alphabuf.o: context.h ../include/GL/gl.h config.h macros.h
+attrib.o: context.h ../include/GL/gl.h config.h list.h macros.h
+bitmap.o: context.h ../include/GL/gl.h config.h feedback.h list.h macros.h
+bitmap.o: pb.h pixel.h
+blend.o: alphabuf.h context.h ../include/GL/gl.h config.h dd.h list.h
+blend.o: macros.h pb.h span.h
+bresenhm.o: context.h ../include/GL/gl.h config.h
+clip.o: ../include/GL/gl.h clip.h config.h context.h list.h macros.h vb.h
+clip.o: xform.h
+context.o: context.h ../include/GL/gl.h config.h dd.h draw.h eval.h light.h
+context.o: lines.h list.h macros.h pb.h points.h polygons.h vb.h
+copypix.o: context.h ../include/GL/gl.h config.h dd.h depth.h feedback.h
+copypix.o: list.h macros.h pixel.h span.h stencil.h
+dd.o: dd.h context.h ../include/GL/gl.h config.h depth.h macros.h
+depth.o: context.h ../include/GL/gl.h config.h depth.h list.h macros.h
+draw.o: clip.h ../include/GL/gl.h config.h context.h dd.h draw.h feedback.h
+draw.o: fog.h light.h lines.h list.h macros.h pb.h points.h polygons.h
+draw.o: texture.h vb.h xform.h
+drawpix.o: context.h ../include/GL/gl.h config.h dd.h feedback.h list.h
+drawpix.o: macros.h pixel.h span.h stencil.h
+enable.o: context.h ../include/GL/gl.h config.h dd.h depth.h draw.h light.h
+enable.o: list.h macros.h stencil.h
+eval2.o: context.h ../include/GL/gl.h config.h draw.h list.h macros.h
+fog.o: context.h ../include/GL/gl.h config.h list.h macros.h
+feedback.o: context.h ../include/GL/gl.h config.h feedback.h list.h macros.h
+get.o: context.h ../include/GL/gl.h config.h dd.h list.h macros.h
+interp.o: context.h ../include/GL/gl.h config.h macros.h
+light.o: context.h ../include/GL/gl.h config.h light.h list.h macros.h vb.h
+light.o: xform.h
+lines.o: bresenhm.h ../include/GL/gl.h context.h config.h dd.h feedback.h
+lines.o: interp.h list.h macros.h pb.h vb.h
+list.o: accum.h context.h ../include/GL/gl.h config.h attrib.h bitmap.h
+list.o: clip.h copypix.h draw.h drawpix.h enable.h eval.h feedback.h fog.h
+list.o: light.h logic.h macros.h pixel.h texture.h vb.h xform.h
+logic.o: context.h ../include/GL/gl.h config.h dd.h list.h macros.h pb.h
+masking.o: alphabuf.h context.h ../include/GL/gl.h config.h dd.h macros.h
+masking.o: masking.h pb.h
+misc.o: accum.h context.h ../include/GL/gl.h config.h alphabuf.h depth.h dd.h
+misc.o: list.h macros.h masking.h stencil.h
+osmesa.o: ../include/GL/osmesa.h ../include/GL/gl.h context.h config.h dd.h
+osmesa.o: depth.h macros.h vb.h xform.h polytemp.h
+pb.o: alpha.h ../include/GL/gl.h alphabuf.h context.h config.h blend.h dd.h
+pb.o: depth.h fog.h logic.h macros.h masking.h pb.h scissor.h stencil.h
+pb.o: texture.h
+pixel.o: context.h ../include/GL/gl.h config.h list.h macros.h pixel.h span.h
+pixel.o: stencil.h
+points.o: context.h ../include/GL/gl.h config.h dd.h feedback.h list.h
+points.o: macros.h pb.h span.h vb.h
+polygons.o: context.h ../include/GL/gl.h config.h dd.h depth.h feedback.h
+polygons.o: interp.h lines.h list.h macros.h points.h span.h vb.h polytemp.h
+readpix.o: alphabuf.h context.h ../include/GL/gl.h config.h depth.h dd.h
+readpix.o: feedback.h list.h macros.h span.h stencil.h
+scissor.o: context.h ../include/GL/gl.h config.h macros.h list.h
+span.o: alpha.h ../include/GL/gl.h alphabuf.h context.h config.h blend.h
+span.o: depth.h dd.h fog.h logic.h macros.h masking.h scissor.h span.h
+span.o: stencil.h texture.h
+stencil.o: context.h ../include/GL/gl.h config.h dd.h list.h macros.h pb.h
+stencil.o: stencil.h
+texture.o: context.h ../include/GL/gl.h config.h list.h macros.h pb.h
+varray.o: draw.h ../include/GL/gl.h context.h config.h macros.h vb.h xform.h
+vb.o: vb.h context.h ../include/GL/gl.h config.h
+vertex.o: context.h ../include/GL/gl.h config.h draw.h light.h list.h
+vertex.o: macros.h vb.h
+winpos.o: ../include/GL/gl.h context.h config.h draw.h list.h macros.h
+xform.o: alphabuf.h context.h ../include/GL/gl.h config.h depth.h dd.h list.h
+xform.o: macros.h stencil.h
+glx.o: ../include/GL/gl.h ../include/GL/glx.h ../include/GL/xmesa.h xmesaP.h
+glx.o: context.h config.h dd.h macros.h
+xfonts.o: ../include/GL/gl.h ../include/GL/xmesa.h macros.h xmesaP.h
+xfonts.o: context.h config.h
+xmesa1.o: ../include/GL/xmesa.h ../include/GL/gl.h xmesaP.h context.h
+xmesa1.o: config.h macros.h xform.h
+xmesa2.o: dd.h context.h ../include/GL/gl.h config.h macros.h xmesaP.h
+xmesa2.o: ../include/GL/xmesa.h
+xmesa3.o: bresenhm.h ../include/GL/gl.h context.h config.h depth.h dd.h
+xmesa3.o: interp.h macros.h polygons.h vb.h xmesaP.h ../include/GL/xmesa.h
+xmesa3.o: polytemp.h

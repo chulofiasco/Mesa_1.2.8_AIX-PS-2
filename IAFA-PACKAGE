@@ -1,0 +1,10 @@
+Title:          The Mesa 3-D graphics library
+Version:        1.2.8
+Description:    A 3-D graphics library which uses the OpenGL API.
+Author:         Brian Paul  brianp@ssec.wisc.edu
+Maintained-by:  Brian Paul  brianp@ssec.wisc.edu
+Maintained-at:  iris.ssec.wisc.edu/pub/Mesa
+Platforms:      Any Unix system with ANSI C and X, MS Windows, Macintosh.
+                Written in ANSI C.
+Copying-Policy: Freely Redistributable
+Keywords:       Mesa, OpenGL, 3-D graphics library

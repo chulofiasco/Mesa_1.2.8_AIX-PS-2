@@ -1,0 +1,130 @@
+# sMakefile for core library for Amiga opengl.lib
+
+# Mesa 3-D graphics library
+# Version:  39.02
+# Copyright (C) 1995  Brian Paul  (brianp@ssec.wisc.edu)
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+##### MACROS #####
+
+INCDIR = /include
+LIBDIR = /lib
+LIBDIR = /lib
+XDIR = x11:sasc
+
+TMP_FILE = T:MesaTMP_SCOPTS
+
+
+COMSOURCES = accum.c alpha.c alphabuf.c attrib.c bitmap.c blend.c bresenhm.c clip.c \
+	context.c copypix.c dd.c depth.c draw.c drawpix.c enable.c \
+	eval2.c fog.c feedback.c fortran.c get.c interp.c \
+	light.c lines.c list.c logic.c masking.c misc.c pb.c \
+	pixel.c points.c polygons.c readpix.c scissor.c span.c stencil.c \
+	texture.c varray.c vb.c vertex.c xform.c 
+AMIGASOURCES = Amigamesa.c osmesa.c
+LIBRARYSOURCES = Amigamesa.c
+AMIWINSOURCES = glx.c xfonts.c xmesa1.c xmesa2.c xmesa3.c osmesa.c
+
+COMOBJECTS = accum.o alpha.o alphabuf.o attrib.o bitmap.o blend.o bresenhm.o clip.o \
+	context.o copypix.o dd.o depth.o draw.o drawpix.o enable.o \
+	eval2.o fog.o feedback.o fortran.o get.o interp.o \
+	light.o lines.o list.o logic.o masking.o misc.o pb.o \
+	pixel.o points.o polygons.o readpix.o scissor.o span.o stencil.o \
+	texture.o varray.o vb.o vertex.o xform.o 
+AMIGAOBJECTS = Amigamesa.o osmesa.o
+LIBRARYOBJECTS = Amigamesa.o
+AMIWINOBJECTS = glx.o xfonts.o xmesa1.o xmesa2.o xmesa3.o osmesa.o
+
+
+AMIGASCFLAGS = idir=$(INCDIR) data=far idlen=63 with=/amiga/SCOPTIONS\
+          nolink ignore=a define=AMIGA define=AMIGALIB
+
+LIBRARYSCFLAGS = idir=$(INCDIR) data=far idlen=63 with=/amiga/scoptions\
+          LIBCODE nolink ignore=a define=AMIGA define=AMIGALIB
+
+AMIWINSCFLAGS = verbose idir=$(INCDIR) idir=$(XDIR)/include data=far idlen=63 \
+          nostkchk ignore=a optimize math=68882 cpu=68040 define=AMIWIN
+
+# Fetures to make and link a shared library for amiga
+VERSION = 39
+REV = 2
+LIBRARYFD = gl.fd
+GL_LIBRARY = libs:gl.library
+MAKELIBRARY = slink lib lib:sc.lib+lib:amiga.lib+lib:scmieee.lib LIBRARYFD $(LIBFD) TO $(GL_LIB) FROM lib:libent.o lib:libinitr.o NOICONS  LIBVERSION $(VERSION) LIBREVISION $(REV)
+
+MAKELIB = oml -n
+GL_LIB = MesaGL.LIB
+GL_AMIGA_LIB = AMesaGL.LIB
+
+CC = sc
+
+##### RULES #####
+.c.o:
+	$(CC) WITH=$(TMP_File) $*.c
+
+##### TARGETS #####
+
+default:
+	@echo "specify: smake <target>"
+	@echo "Where <targets> is one of"
+	@echo "       amiga   - Compiles a link library"
+	@echo "       library - A standard library (still beta)"
+	@echo "       targets - Compilations for AMIWIN"
+
+clean:
+	-delete *.o $(GL_LIB)
+
+
+amiga: $(LIBDIR)/$(GL_AMIGA_LIB)
+	@echo "------- FINISHID ------"
+
+library: $(GL_LIBRARY)
+	@echo "------- FINISHID ------"
+
+targets: $(LIBDIR)/$(GL_LIB)
+	@echo "------- FINISHID ------"
+
+# Make the library 
+$(LIBDIR)/$(GL_AMIGA_LIB): AmigaLIB $(COMOBJECTS) $(AMIGAOBJECTS) DeleteTMP
+	@echo "------ Making LIB Amiga -----"
+	$(MAKELIB) $@ R $(COMOBJECTS) $(AMIGAOBJECTS)
+	copy $@ $(LIBDIR)/$(GL_LIB)
+	delete $@
+
+$(GL_LIBRARY): AmigaLibrary $(COMOBJECTS) $(LIBRARYOBJECTS) DeleteTMP
+	@echo "------ Making Library -----"
+	$(MAKELIBRARY) $(COMOBJECTS) $(LIBRARYOBJECTS)
+	
+	
+$(LIBDIR)/$(GL_LIB):	AMIWIN $(COMOBJECTS) $(AMIWINOBJECTS) DeleteTMP
+	@echo "------ Making LIB AMIWIN -----"
+	$(MAKELIB) $@ R $(COMOBJECTS) $(AMIWINOBJECTS)
+	
+
+
+# Makes temporary scoptions to use in global .c.o	
+AmigaLIB:
+	@echo >$(TMP_FILE) "$(AMIGASCFLAGS)"
+
+AmigaLibrary:
+	@echo >$(TMP_FILE) "$(LIBRARYSCFLAGS)"
+
+AMIWIN:
+	@echo >$(TMP_FILE) "$(AMIWINSCFLAGS)"
+
+DeleteTMP:
+	@delete $(TMP_FILE)
+

@@ -1,0 +1,215 @@
+<!-- $RCSfile$$Revision$$Date$ -->
+<!-- $Log$ -->
+<HTML>
+<TITLE> MESAWORKSTATION </TITLE>
+<h2>NAME</h2>
+MesaWorkstation - A simple workstation abstraction widget for Mesa/X
+<p><h2>DESCRIPTION</h2>
+<h2>Resources</h2>
+The following X resources are available in addition to the <B>MesaDrawingArea</B>
+resources:
+<p><pre>
+      ___________________________________________________________________________
+      |                    |                    |         |                      |
+      | Name               | Class              | Type    | OpenGL attribute     |
+      |____________________|____________________|_________|______________________|
+      |                    |                    |         |                      |
+      |                    |                    |         |                      |
+      |____________________|____________________|_________|______________________|
+</pre>
+
+<dl>
+
+</dl>
+
+<h2>Actions</h2>
+
+<dl>
+
+<A NAME="MesaWorkstation_15"></A>
+<dt><B>Projection ()</B> </dt>
+
+<A NAME="MesaWorkstation_16"></A>
+<dt><B>Move ()</B> </dt>
+
+</dl>
+
+<h2>Translations</h2>
+
+<dl>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;Left: <I>Move(l)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;Left: <I>Move(l,10)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;Right: <I>Move(r)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;Right: <I>Move(r,10)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;Up: <I>Move(u)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;Up: <I>Move(u,10)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;Down: <I>Move(d)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;Down: <I>Move(d,10)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>&lt;Key&gt;plus: <I>Move(+)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>&lt;Key&gt;minus: <I>Move(-)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;l: <I>Projection(l)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;l: <I>Projection(L)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;r: <I>Projection(r)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;r: <I>Projection(R)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;b: <I>Projection(b)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;b: <I>Projection(B)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;t: <I>Projection(t)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;t: <I>Projection(T)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;n: <I>Projection(n)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;n: <I>Projection(N)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;f: <I>Projection(f)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;f: <I>Projection(F)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>~Shift&lt;Key&gt;a: <I>Projection(a)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>Shift&lt;Key&gt;a: <I>Projection(A)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>&lt;Key&gt;p: <I>Projection(p)</I></B> </dt>
+
+<A NAME=""></A>
+<dt><B>&lt;Key&gt;o: <I>Projection(o)</I></B> </dt>
+
+</dl>
+
+<h2>Utility functions</h2>
+<dd>
+The following utility functions are available
+<p></dd>
+<p>
+
+<dl>
+
+<A NAME="MesaWorkstation_45"></A>
+<dt><B>void GLwBeginProjection (Widget w)</B> </dt>
+<dt><B>void GLwEndProjection (void)</B> </dt>
+<dd>
+The following code snippet selects perspective projection for the
+workstation <I>ws</I>:
+<p></dd>
+<p>
+<pre>
+            GLwBeginProjection (ws);
+              glFrustum (-1.0, 1.0, -1.0, 1.0, 1.0, 10.0);
+            GLwEndProjection ();
+</pre>
+During redisplay, this will be executed as a display list with the
+matrix mode set to <I>GL_PROJECTION</I> and an identity matrix on top of
+the projection matrix stack.
+<p><dt><B>void GLwPostProjectionList (Widget w, GLuint p)</B> </dt>
+<dt><B>void GLwPostProjectionMatrix (Widget w, GLdouble *m)</B> </dt>
+<dt><B>void GLwPostCurrentProjection (Widget w)</B> </dt>
+<dt><B>void GLwUnpostProjection (Widget w)</B> </dt>
+
+<A NAME="MesaWorkstation_46"></A>
+<dt><B>GLuint GLwGetProjectionList (Widget w)</B> </dt>
+
+<A NAME="MesaWorkstation_47"></A>
+<dt><B>int GLwGetProjectionMatrix (Widget w, GLdouble *m)</B> </dt>
+
+<A NAME="MesaWorkstation_45"></A>
+<dt><B>void GLwSetFrustumProjection (Widget w, GLdouble left, GLdouble right, 	GLdouble bottom, GLdouble top, GLdouble near, GLdouble far)</B> </dt>
+<dt><B>void GLwSetOrthoProjection (Widget w, GLdouble left, GLdouble right, 	GLdouble bottom, GLdouble top, GLdouble near, GLdouble far)</B> </dt>
+<dt><B>void GLwBeginView (Widget w)</B> </dt>
+<dt><B>void GLwEndView (void)</B> </dt>
+<dd>
+The following code snippet selects a view from the z-axis for the
+workstation <I>ws</I>:
+<p></dd>
+<p>
+<pre>
+            GLwBeginView (ws);
+              gluLookAt (0.0, 0.0, 3.0,
+                         0.0, 0.0, 0.0,
+                         0.0, 1.0, 0.0);
+            GLwEndView ();
+</pre>
+During redisplay, this will be executed as a display list with the
+matrix mode set to <I>GL_MODELVIEW</I> and an identity matrix on top of
+the model view matrix stack.
+<p><dt><B>void GLwPostViewList (Widget w, GLuint v)</B> </dt>
+<dt><B>void GLwPostViewMatrix (Widget w, GLdouble *m)</B> </dt>
+<dt><B>void GLwPostCurrentView (Widget w)</B> </dt>
+<dt><B>void GLwUnpostView (Widget w)</B> </dt>
+
+<A NAME="MesaWorkstation_46"></A>
+<dt><B>GLuint GLwGetViewList (Widget w)</B> </dt>
+
+<A NAME="MesaWorkstation_47"></A>
+<dt><B>int GLwGetViewMatrix (Widget w, GLdouble *m)</B> </dt>
+
+<A NAME="MesaWorkstation_45"></A>
+<dt><B>void GLwSetPolarView (Widget w, GLdouble r, GLdouble theta, GLdouble phi)</B> </dt>
+<dt><B>void GLwPostObject (Widget w, GLuint o)</B> </dt>
+<dd>
+posts <I>object</I> to <I>w</I>.
+<p></dd>
+<p>
+<dt><B>void GLwUnpostObject (Widget w, GLuint o)</B> </dt>
+<dt><B>void GLwUnpostAllObjects (Widget w)</B> </dt>
+<dt><B>void GLwRedrawObjects (Widget w)</B> </dt>
+<dd>
+force a redraw of all objects posted to <I>w</I>.
+<p></dd>
+<p>
+
+</dl>
+
+<h2>SEE ALSO</h2>
+
+<A HREF="file://localhost/home/ohl/c/widgets/man/GLwDrawingArea.html">
+the GLwDrawingArea manpage</A>
+, 
+<A HREF="file://localhost/home/ohl/c/widgets/man/MesaDrawingArea.html">
+the MesaDrawingArea manpage</A>
+
+<p><h2>AUTHOR</h2>
+Thorsten.Ohl @ Physik.TH-Darmstadt.de
+<p><h2>DATE</h2>
+$Id: MesaWorkstation.pod,v 1.6 1995/05/19 20:31:00 ohl Exp $<p>

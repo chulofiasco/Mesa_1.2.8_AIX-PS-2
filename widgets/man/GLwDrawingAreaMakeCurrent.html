@@ -1,0 +1,31 @@
+<!-- $RCSfile$$Revision$$Date$ -->
+<!-- $Log$ -->
+<HTML>
+<TITLE> GLWDRAWINGAREAMAKECURRENT </TITLE>
+<h2>NAME</h2>
+GLwDrawingAreaMakeCurrent - Make the current GLwDrawingArea current.
+<p><h2>SYNOPSIS</h2>
+<pre>
+      #include &lt;GL/GLwDrawA.h&gt;
+      void GLwDrawingAreaMakeCurrent(w, ctx)
+           Widget w;
+           GLXContext ctx;
+</pre>
+<h2>DESCRIPTION</h2>
+
+<dl>
+
+<A NAME="GLwDrawingAreaMakeCurrent_11"></A>
+<dt><B>GLwDrawingAreaMakeCurrent</B> </dt>
+<dd>
+is a front end to <I>glXMakeCurrent</I>, however instead of passing in a
+Display and a Window, a Widget is passed in.
+<p></dd>
+<p>
+
+</dl>
+
+<h2>RELATED INFORMATION</h2>
+GLwMDrawingArea, glXMakeCurrent.
+<p><h2>DATE</h2>
+$Id: GLwDrawingAreaMakeCurrent.pod,v 1.1 1995/03/28 22:57:07 ohl Exp $<p>

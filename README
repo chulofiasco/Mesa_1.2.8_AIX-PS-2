@@ -1,0 +1,1004 @@
+
+		      The Mesa 3-D graphics library
+
+			      Version 1.2.8
+
+		    Copyright (C) 1995-1996  Brian Paul
+
+
+
+Introduction
+============
+
+Mesa is a 3-D graphics library with an API which is very similar to that
+of OpenGL*.  To the extent that Mesa utilizes the OpenGL command syntax
+or state machine, it is being used with authorization from Silicon Graphics,
+Inc.  However, the author makes no claim that Mesa is in any way a
+compatible replacement for OpenGL or associated with Silicon Graphics, Inc.
+Those who want a licensed implementation of OpenGL should contact a licensed
+vendor.  This software is distributed under the terms of the GNU Library
+General Public License, see the LICENSE file for details.
+
+* OpenGL(R) is a registered trademark of Silicon Graphics, Inc.
+
+
+
+Author
+======
+
+Brian Paul
+Space Science and Engineering Center
+University of Wisconsin - Madison
+1225 W. Dayton St.
+Madison, WI  53706
+
+brianp@ssec.wisc.edu
+http://www.ssec.wisc.edu/~brianp/homepage1.html
+
+
+
+Status
+======
+
+I've been working on this library in my spare time since August, 1993.
+It's currently about 95% complete.  You'll find that most programs which
+use the OpenGL tk, aux or GLUT toolkits will work with Mesa without changing
+the source code at all.
+
+Features which are complete:
+	all glBegin() primitives
+	all model and view transformations
+	clipping (against user clip planes and view volume)
+	lighting
+	smooth shading
+	depth buffering
+	accumulation buffer
+	alpha testing/blending
+	stencil buffer
+	dithering
+	logic operations
+	evaluators  (curves and surfaces)
+	feedback/selection
+	fog (per-pixel or per-vertex)
+	polygon/line stippling
+	read/write/copy pixels
+	tk and aux libraries for X11
+	context switching (multiple windows)
+	RGB mode simulated in color mapped windows
+	the GLX library (as close as I can get)
+	glPixelZoom
+	display lists
+
+Features which are mostly complete:
+	texture mapping
+	the GLU library
+	NURBS
+
+Missing features:
+	anti-aliasing
+	mipmapping, non-point-sampled texture mapping
+	glGetTexGen* functions
+	glGetPolygonStipple
+
+
+The primary goal of this library has been correctness, speed was secondary
+(but not neglected!).  Optimizations are the focus of most current work.
+
+The core library was originally written on an Amiga using the DCC compiler.
+Later on it was moved to an SGI.  Current development is done on an SGI
+system.
+
+Mesa works on most Unix workstations with ANSI C and X11.  There are also
+drivers for Amiga, Microsoft Windows, Macintosh, and NeXT systems.  See
+below for more information.
+
+Please send bug reports to the author.  Include information describing
+your system, which version of Mesa you're using, and how to reproduce the
+problem.  Bug fixes are especially welcome.  Note that some parts of Mesa
+(widgets, GLU tesselator, NURBS, non-Unix/X11 device drivers, etc) were
+contributed by others and any bugs in those components should be sent to
+the respective author.
+
+Anyone is welcome to contribute code to the Mesa project, provided you
+agree to the GNU license.
+
+Since the OpenGL API is used, OpenGL documentation can serve as the
+documentation for Mesa's core functions.  Here are a few sources:
+
+  WWW Center:   http://www.sgi.com/Technology/openGL/
+  Man pages:    http://www.digital.com:80/pub/doc/opengl/
+  Spec doc:     http://www.sgi.com/Technology/openGL/glspec/glspec.html
+
+
+
+
+Getting the software
+====================
+
+The primary Mesa ftp site is iris.ssec.wisc.edu in the pub/Mesa directory.
+Mesa is also mirrored on sunsite in the directory pub/packages/development
+/graphics/mesa.
+
+
+The archive file Mesa-1.2.8.tar.Z can be unpacked with:
+	zcat Mesa-1.2.8.tar.Z | tar xf -
+
+The archive file Mesa-1.2.8.tar.gz can be unpacked with:
+	gzcat Mesa-1.2.8.tar.gz | tar xf -
+
+After you unpacking you should have the following files in the Mesa-1.2.8
+directory:
+
+README		- this file
+README.AMIWIN	- instructions for using Mesa on Amigas with AmiWin (X11)
+LICENSE		- the GNU library license
+IAFA-PACKAGE	- description file
+Makefile	- top-level Makefile
+Make-config	- system configurations used by the Makefiles
+mklib.*		- scripts for making shared libraries for some systems
+include/	- application include files
+lib/		- application libraries, created during installation
+src/		- source code for core library
+src-glu/	- source code for utility library
+src-tk/		- source code for tk library
+src-aux/	- source code for aux library
+demos/		- demo programs
+samples/	- sample OpenGL programs from SGI
+book/		- example programs from the OpenGL Programming Guide
+widgets/	- Mesa widgets for Xt/Motif
+windows/	- Microsoft Windows driver stuff
+NeXT/		- NeXT demo programs
+mondello/	- Cirrus Logic Mondello 3-D accelerator code
+amiga/		- AmigaDOS driver
+
+
+
+Installation for Unix/X11
+=========================
+
+To compile the library, first type 'make' alone to see the list of system
+configurations currently supported.  If you see your configuration on the
+list, type 'make <config>'.  Most popular Unix/X workstations are currently
+supported.
+
+The top-level makefile will execute the makefiles in a number of sub-
+directories.  When finished, there should be executables in the "demos/",
+"samples/", and "book/" directories for you to try out.  If you only want
+to compile the contents of one subdirectory you can 'cd' to that directory
+and type 'make <config>' there.  For example, to just compile the main
+Mesa library:  cd src ; make <config>
+
+If your system is not listed by 'make', you'll have to modify the top-level
+Makefile and Make-config files.  There are instructions in each file.
+
+If you have compilation problems you should try to fix them and return the
+patches to the author.
+
+If you want to build the Mesa widgets read the widgets/INSTALL file.
+
+If you want to build the GLUT library read the README.GLUT file.
+
+Note to HP users:  a Mesa user reports that the HP-UX 10.01 C compiler has
+a bug which effects glReadPixels.  A patch for the compiler (PHSS_5743) is
+available.  Otherwise be sure your compiler is version 10.13 or later.
+
+Note to QNX users:  if you have problems running the demos try setting the
+stack size to 200K or larger with -N200K, for example.
+
+
+
+Installation for Amigas
+=======================
+
+To use Mesa on Amigas with AmiWin (an X server for the Amiga), read the
+README.AMIWIN file.
+
+To use Mesa on ordinary Amigas read the README.AMIGA file.  Problems or
+question about the Amiga driver should be sent to Stefan Zivkovic
+(d94sz@efd.lth.se).
+
+
+
+Installation for Microsoft Windows
+==================================
+
+See the README.WIN file for details.  Problems or questions about the Windows
+driver should be sent to Mark Peterson at markp@ic.mankato.mn.us
+
+
+
+Installation for Macintosh
+==========================
+
+From ftp://iris.ssec.wisc.edu/pub/Mesa/contrib download these files:
+	mesa0.31b.sit.hqx
+	GLUT4Mac.sit.hqx
+Miklos Fazekas (boga@augusta.elte.hu) should be contacted if you have
+questions about the Mac driver.
+
+
+
+Installation for NeXT
+=====================
+
+Simply typing "make next" should compile Mesa and a number of NeXT demo
+programs found in the NeXT/ directory.  NeXT support was contributed by
+Pascal Thibaudeau (pascal@galileo.slip.u-bordeaux.fr).  It was implemented
+through Mesa's Off-Screen rendering interface.
+
+
+
+Using the library
+=================
+
+Configuration options:
+   The file src/config.h has many parameters which you can adjust such
+   as maximum number of lights, clipping planes, maximum texture size,
+   etc.  In particular, you may want to change DEPTH_BITS from 16 to 32
+   if a 16-bit depth buffer isn't precise enough for your application.
+
+
+Shared libraries:
+   If you compile shared libraries you may have to set an environment
+   variable to specify where the Mesa libraries are located.  On Linux and
+   Sun systems for example, set the LD_LIBRARY_PATH variable to include
+   /your-dir/Mesa-1.2.8/lib.   Otherwise, when you try to run a demo it
+   may fail with a message saying that one or more libraries couldn't be
+   found.
+
+
+Header and library files:
+   To use the library with your own applications you may want to move the
+   files in "include/" to "/usr/local/include/" and the libraries in "lib/"
+   to "/usr/local/lib/".  Then compile your graphics application with
+   "-I/usr/local/include" and link with "-L/usr/local/lib -lMesaGL -lMesaGLU",
+   for example.  Look at the demos/Makefile for an example.
+
+   As of version 1.2.3, Mesa's header files use the same GLenum and GLUenum
+   values as SGI's (and most/all other vendor's) OpenGL headers.  This means
+   you can freely mix object files compiled with OpenGL or Mesa headers.
+   In fact, on systems with dynamic runtime linkers it's possible to dynam-
+   ically link with Mesa or OpenGL shared libraries at runtime, without
+   recompiling or relinking anything!
+
+   Using IRIX 5.x as an example, you can run SGI's OpenGL demos with the
+   Mesa shared libraries as follows.  Let's assume you're installing Mesa
+   in /usr/local/Mesa and using the C-shell:
+       % cd /usr/local/Mesa
+       % make irix5-dso
+       % cd lib
+       % ln -s libMesaGL.so libGL.so
+       % setenv _RLD_LIST "/usr/local/Mesa/lib/libGL.so:DEFAULT"
+       % /usr/demos/bin/ideas_ogl      // this is a test
+
+   You can now run OpenGL executables on almost any X display!  There may
+   be some problems from the fact that Mesa supports many X visual types
+   that an OpenGL client may not expect (grayscale for example).  In this
+   case the application may abort, print error messages, or just behave
+   strangely.  You may have to experiment with the MESA_RGB_VISUAL envi-
+   ronment variable.
+
+
+Toolkits (X11 only):
+   Initially, you may write your own Mesa programs using the aux or tk tool-
+   kits which are used in the OpenGL Programming Guide and in SGI's demos,
+   respectively.  However, these toolkits weren't meant for use in real app-
+   lications.  You have several alternatives:
+
+      1. Use the GLX (simulated since Mesa doesn't implement the GLX proto-
+      col) functions.  These functions look like, and try to act like, the
+      real GLX functions used by OpenGL in conjunction with the X window
+      system.
+
+      2. GLUT (OpenGL Utility Toolkit) was written by Mark Kilgard at SGI as
+      a replacement for aux and tk.  It provides a simple, portable, window-
+      system independent interface allowing you to write OpenGL applications
+      quickly and easily.  GLUT isn't included with Mesa but you'll find
+      instructions on how to get and build GLUT in the file README.GLUT.
+
+      3. Use an Xt/Motif widget.  Look in the widgets/ directory for more info.
+
+      4. Go directly to the X/Mesa interface using the functions described
+      in include/GL/xmesa.h.  This requires experience with X programming.
+      Using GLX is probably a better choice because it's portable.
+
+
+Performance tips:
+   1. Turn off smooth shading when you don't need it (glShadeModel)
+   2. Turn off depth buffering when you don't need it.
+   3. Turn off dithering when not needed.
+   4. Use double buffering as it's often faster than single buffering
+   5. Compile in the X Shared Memory extension option if it's supported
+      on your system by adding -DSHM to CFLAGS and -lXext to XLIBS for
+      your system in the Make-config file.
+   6. Recompile Mesa with more optimization if possible.
+   7. Try to maximize the amount of drawing done between glBegin/glEnd pairs.
+      This can be especially beneficial with Mesa 1.2.3 or later because of
+      its "vectorized" transformation code.
+   8. Use the MESA_BACK_BUFFER variable to find best performance in double
+      buffered mode.
+   9. Optimized polygon rasterizers are used when:
+         rendering into back buffer which is an XImage
+         RGB mode, not grayscale, not monochrome
+         depth buffering is GL_LESS, or disabled
+         flat or smooth shading
+         dithered or non-dithered
+         no other rasterization operations enabled (blending, stencil, etc)
+      Faster line drawing is also available when:
+         rendering into back buffer which is an XImage
+         RGB mode, not grayscale, not monochrome
+         depth buffering is GL_LESS or disabled
+         flat shading
+         dithered or non-dithered
+         no other rasterization operations enabled (blending, stencil, etc)
+   10. Mesa 1.2.7 (and later) uses an optimized lighting function when:
+        Two-sided lighting is disabled
+        GL_LIGHT_MODEL_LOCAL_VIEWER is false
+        GL_COLOR_MATERIAL is disabled
+        No spot lights are used (all GL_SPOT_CUTOFFs are 180.0)
+        No local lights are used (all position W's are 0.0)
+        All material and light coefficients are >= zero
+
+
+
+Debugging:
+   Normally Mesa records but does not notify the user of errors.  It is up
+   to the application to call glGetError to check for errors.  Mesa supports
+   an environment variable, MESA_DEBUG, to help with debugging.  If MESA_DEBUG
+   is defined, a message will be printed to stdout whenever an error occurs.
+
+   With a debugger you may set a breakpoint in gl_error() to trap upon Mesa
+   errors.
+
+
+X Display Modes:
+   Mesa supports rendering in most X visual types and depths.  When a
+   TrueColor or DirectColor visual isn't available dithering is used in RGB
+   mode.
+
+   The glXChooseVisual function tries its best to pick an appropriate visual
+   for the given attribute list.  However, if this doesn't suit your needs
+   you can force Mesa to use any X visual you want (any supported by your
+   X server that is) by setting the MESA_RGB_VISUAL and MESA_CI_VISUAL
+   environment variables.  When an RGB visual is requested, glXChooseVisual
+   will first look if the MESA_RGB_VISUAL variable is defined.  If so, it
+   will try to use the specified visual.  Similarly, when a color index
+   visual is requested, glXChooseVisual will look for the MESA_CI_VISUAL
+   variable.
+
+   The format of accepted values is:  <visual-class> <depth>
+   Here are some examples:
+
+   using the C-shell:
+	% setenv MESA_RGB_VISUAL "TrueColor 8"		// 8-bit TrueColor
+	% setenv MESA_CI_VISUAL "PseudoColor 12"	// 12-bit PseudoColor
+	% setenv MESA_RGB_VISUAL "PseudoColor 8"	// 8-bit PseudoColor
+
+   using the KornShell:
+	$ export MESA_RGB_VISUAL="TrueColor 8"
+	$ export MESA_CI_VISUAL="PseudoColor 12"
+	$ export MESA_RGB_VISUAL="PseudoColor 8"
+
+
+Double buffering (X11 only):
+   Mesa can use either an X Pixmap or XImage as the backbuffer when in
+   double buffer mode.  Using GLX, the default is to use an XImage.  The
+   MESA_BACK_BUFFER environment variable can override this.  The valid
+   values for MESA_BACK_BUFFER are:  Pixmap and XImage (only the first
+   letter is checked, case doesn't matter).
+
+   A pixmap is faster when drawing simple lines and polygons while an
+   XImage is faster when Mesa has to do pixel-by-pixel rendering.  If you
+   need depth buffering the XImage will almost surely be faster.  Exper-
+   iment with the MESA_BACK_BUFFER variable to see which is faster for
+   your application.  
+
+
+Colormaps (X11 only):
+   When using Mesa directly or with GLX, it's up to the application writer
+   to create a window with an appropriate colormap.  The aux, tk, and GLUT
+   toolkits try to minimize colormap "flashing" by sharing colormaps when
+   possible.  Specifically, if the visual and depth of the window matches
+   that of the root window, the root window's colormap will be shared by
+   the Mesa window.  Otherwise, a new, private colormap will be allocated.
+
+   When sharing the root colormap, Mesa may be unable to allocate the colors
+   it needs, resulting in poor color quality.  This can happen when a
+   large number of colorcells in the root colormap are already allocated.
+   To prevent colormap sharing in aux, tk and GLUT, define the environment
+   variable MESA_PRIVATE_CMAP.  The value isn't significant.
+
+
+Fortran bindings:
+   Mesa 1.2.4 introduces a preliminary Fortran API to Mesa.  Only a subset
+   of the gl* functions are supported at this time.  None of the glu*
+   functions are available.  Also, you'll have to write your window system
+   interface code in C or use the Fortan interface to GLUT since the GLX,
+   XMesa, and widget interfaces don't work with Fortran.
+
+   To use Mesa from Fortran you must include Mesa/include/GL/fgl.h in
+   your program.  All the GL_ constants are identical in name and value
+   to their C counterparts.  API function names, however, are different
+   in that they are all prefixed with 'fgl' instead of 'gl.'
+
+   Link your Fortran application with libMesaGL.a just like you would for
+   a C application.
+
+   See the Mesa/src/fortran.c file to see how wrappers are constructed
+   for each gl* function.  If a function you need doesn't have a wrapper
+   yet, please try to implement it yourself then send the new code to
+   the author.
+
+   The Fortran interface has only been tested on a few systems (IRIX,
+   AIX) at this time.  However, the fortran.c file structure should be
+   flexible enough to adapt to most other system's C/Fortran calling
+   conventions.  See the comments in that file for more info.
+
+   demos/fdraw.f and demos/ftest.c is an example of using the Fortran API.
+   Also read include/GL/fgl.h for comments about Fortran API function
+   argument types.
+
+   A new set of Fortran 77 and Fortran 90 bindings are under development
+   now by William F. Mitchell (william.mitchell@nist.gov).
+
+
+Gamma correction (X11 only):
+   To compensate for the nonlinear relationship between pixel values
+   and displayed intensities, there is a gamma correction feature in
+   Mesa.  Some systems, such as Silicon Graphics, support gamma
+   correction in hardware (man gamma) so you won't need to use Mesa's
+   gamma facility.  Other systems, however, may need gamma adjustment
+   to produce images which look correct.  If in the past you thought
+   Mesa's images were too dim, read on.
+
+   Gamma correction is controlled with the MESA_GAMMA environment
+   variable.  Its value is of the form "Gr Gg Gb" or just "G" where
+   Gr is the red gamma value, Gg is the green gamma value, Gb is the
+   blue gamma value and G is one gamma value to use for all three
+   channels.  Each value is a positive real number typically in the
+   range 1.0 to 2.5.  The defaults are all 1.0, effectively disabling
+   gamma correction.  Examples using csh:
+
+	% setenv MESA_GAMMA "2.3 2.2 2.4"	// separate R,G,B values
+	% setenv MESA_GAMMA "2.0"		// same gamma for R,G,B
+
+   The demos/gamma.c program may help you to determine reasonable gamma
+   value for your display.  With correct gamma values, the color intensities
+   displayed in the top row (drawn by dithering) should nearly match those
+   in the bottom row (drawn as grays).
+
+   Alex De Bruyn reports that gamma values of 1.6, 1.6 and 1.9 work well
+   on HP displays using the HP-ColorRecovery technology.
+
+   Mesa implements gamma correction with a lookup table which translates
+   a "linear" pixel value to a gamma-corrected pixel value.  There is a
+   small performance penalty.  Gamma correction only works in RGB mode.
+   Also be aware that pixel values read back from the frame buffer will
+   not be "un-corrected" so glReadPixels may not return the same data
+   drawn with glDrawPixels.
+
+   For more information about gamma correction see:
+   http://www.inforamp.net/~poynton/notes/colour_and_gamma/GammaFAQ.html
+
+
+Off-screen rendering:
+   Mesa 1.2.4 introduced off-screen rendering, a facility for generating
+   3-D imagery without having to open a window on your display.  Mesa's
+   simple off-screen rendering interface is completely operating system
+   and window system independent so programs which use off-screen rendering
+   should be very portable.  This new feature effectively enables you to
+   use Mesa as an off-line, batch-oriented renderer.
+
+   The "OSMesa" API provides 3 functions for making off-screen renderings:
+   OSMesaCreateContext(), OSMesaMakeCurrent(), and OSMesaDestroyContext().
+   See the Mesa/include/GL/osmesa.h header for more information.  See the
+   demos/osdemo.c file for an example program.   There is no facility for
+   writing images to files.
+
+   If you want to generate large images (larger than 1280x1024) you'll
+   have to edit the src/config.h file to change MAX_WIDTH and MAX_HEIGHT
+   then recompile Mesa.  Image size should only be limited by available
+   memory.
+
+
+Profiling:
+   Mesa 1.2.6 introduced a simple profiling facility.  It counts and
+   measures the time spent in a number of important rendering operations
+   and prints the information in a report before your program exits.
+
+   By default, profiling is disabled.  To enable it, add -DPROFILE to
+   the appropriate CFLAGS entry in the Make-config file, then recompile
+   Mesa.  In general, you should only enable profiling during program
+   development to gain insight into Mesa's performance.  Mesa runs a bit
+   slower when profiling is enabled because it requires frequent polling
+   of the system clock.
+
+   The profiling report will be printed when glXDestroyContext is called
+   _if_ the MESA_PROFILE environment variable is set.  You must be sure
+   glXDestroyContext is called before exiting to get the profile report.
+   The report will be printed to stdout and includes:
+
+      glBegin/glEnd - number of glBegin/glEnd pairs called, total time,
+         and rate in pairs/second.
+      vertexes transformed - number of vertices transformed, lit, clip-
+         tested, fogged, and mapped to window coordinates, total time,
+         and rate in vertexes/second.
+      points rasterized - number of points drawn, time, and rate.
+      lines rasterized - number of lines drawn, time, and rate.
+      polygons rasterized - number of polygons drawn, time and rate.
+      overhead - time between glBegin/glEnd not accounted for by vertexes,
+         points, lines, and polygons.  This is time spent executing
+         glVertex, glNormal, glColor, etc, clipping, primitive assembly,
+         and user code between glBegin/glEnd.
+      glClear - number of glClears executed, total time and clears/second.
+      SwapBuffers - number of swaps executed, total time and swaps/second.
+
+   Note that the real point, line, and polygon rates should be computed by
+      adding in the vertex transformation and overhead time factors.
+
+
+Linux SVGA driver:
+   Mesa 1.2.6 has a preliminary Linux SVGA driver for Mesa.  It's based
+   on the SVGA library included with Linux.  The driver isn't finished
+   yet.  I'm not too familiar with SVGA graphics so I could use some help
+   finishing it.  Contact Brian if you want to help.
+
+   To enable the SVGA driver, edit the Make-config file and add -DSVGA to
+   the CFLAGS for Linux and add -lvga to the LIBS variable.  There are
+   several test programs (vtest.c, vgears.c, vindex.c) in the demos
+   directory.  See the include/GL/svgamesa.h and src/svgamesa.c files for
+   more information about the driver.
+
+
+Extensions:
+   The following OpenGL extensions are currently implemented:
+
+      GL_EXT_blend_color - allows blending with a constant color
+      GL_EXT_blend_minmax - blend min/max operator
+      GL_EXT_blend_logic_op - allows glLogicOp to work in RGBA mode
+      GL_EXT_blend_subtract - blend subtraction operator
+      GL_EXT_polygon_offset - useful for drawing outlined polygons
+      GL_EXT_vertex_array - vertex array extension
+      GLX_EXT_visual_info - GLX visual and transparent pixel extension
+
+   For detailed information about the extensions see:
+      ftp://sgigate.sgi.com/pub/opengl/extensions/
+
+   There are two Mesa-specific GLX extension at this time.
+
+   GLX_MESA_pixmap_colormap 
+
+      This extension adds the GLX function:
+
+         GLXPixmap glXCreateGLXPixmapMESA( Display *dpy, XVisualInfo *visual,
+                                           Pixmap pixmap, Colormap cmap )
+
+      It is an alternative to the standard glXCreateGLXPixmap() function.
+      Since Mesa supports RGB rendering into any X visual, not just True-
+      Color or DirectColor, Mesa needs colormap information to convert RGB
+      values into pixel values.  An X window carries this information but a
+      pixmap does not.  This function associates a colormap to a GLX pixmap.
+      See the demos/glxpixmap.c file for an example of how to use this
+      extension.
+
+   GL_MESA_window_pos
+
+      This extension adds the glWindowPos*MESA() functions.  These functions
+      are convenient alternatives to glRasterPos*() because they set the
+      current raster position to a specific window coordinate, bypassing the
+      usual modelview, projection and viewport transformations.  This is
+      especially useful for setting the position for glDrawPixels() or
+      glBitmap() to a specific window coordinate.
+
+      X and Y parameters (positive and negative) are directly mapped to
+      window coordinates.  Z is a depth value clamped to the range [0,1].
+      W is directly mapped.  The current raster position valid flag is
+      always set to true.  The current raster distance is set to zero.
+      The current raster color and texture coordinate are updated in the
+      same manner as glRasterPos().  In selection mode a hit record is
+      always generated.
+
+      Programs using OpenGL, not Mesa, may also use the glWindowPos*MESA()
+      functions by including winpos.h from the src directory and by
+      compiling and linking with the winpos.c file from the src directory.
+
+
+Software alpha planes:
+   Many color frame buffers do not have alpha planes.  Since some
+   applications need them, Mesa can simulate alpha planes in software.
+   By default software alpha buffering is disabled.  Software alpha
+   buffers are enabled with the MESA_ALPHA environment variable.  The
+   value of this variable is a string containing either "front", "back"
+   or both values: "front back".  For example:
+
+      setenv MESA_ALPHA "front"
+      setenv MESA_ALPHA "back"
+      setenv MESA_ALPHA "front back"
+
+   Software alpha buffers are 8 bits deep; one byte of memory per pixel.
+   Be aware that there is a small performance penalty for using software
+   alpha buffers.
+
+   This environment variable will be removed in the future.  It will be
+   up to the application code to request alpha planes when needed.
+
+
+Summary of environment variables:
+   MESA_RGB_VISUAL - specifies the X visual and depth for RGB mode (X only)
+   MESA_CI_VISUAL - specifies the X visual and depth for CI mode (X only)
+   MESA_BACKBUFFER - specifies how to implement the back color buffer
+   MESA_DEBUG - if defined, error messages are printed to stderr
+   MESA_PRIVATE_CMAP - force aux/tk libraries to use private colormaps (X only)
+   MESA_GAMMA - gamma correction coefficients (X only)
+   MESA_PROFILE - enable reporting of performance measurements
+   MESA_ALPHA - enable simulated alpha buffer components in RGB mode
+   MESA_XSYNC - enable synchronous X behavior (for debugging only)
+
+
+
+Miscellaneous
+=============
+
+There is a Mesa WWW page:  http://www.ssec.wisc.edu/~brianp/Mesa.html
+
+There is a Mesa mailing list.  To subscribe, send the following message to
+the address listproc@iqm.unicamp.br
+
+subs mesa <your name>
+
+For example:
+
+subs mesa Brian Paul
+
+You will receive a welcome message from the list server when you have been
+added to the list.  It tells you how to post messages to the list, how
+to unsubscribe, etc.  Thanks to Pedro Vazquez (vazquez@iqm.unicamp.br) for
+setting up the list.
+
+There is a contrib/ subdirectory on the Mesa ftp site which contains
+contributions from Mesa users.  See the README file in that directory for
+more information.
+
+
+
+Known Bugs
+==========
+
+1. Evaluator automatic normal vectors are miscalculated under certain
+   conditions.
+
+2. glCopyPixels gives undefined results when source and destination regions
+   overlap and pixel zoom!=1.0.
+
+3. Mesa doesn't work too well on Crays.  The problem is that Crays do not
+   have the exact C data type sizes which Mesa's X driver relies on.  Better
+   Cray support may or may not be seen in the future.
+
+4. glDrawBuffer( GL_FRONT_AND_BACK ) doesn't work.
+
+
+
+Future Plans
+============
+
+1. Display list optimization:  scan for duplicate vertices and normals in
+   order to reduce number of transformations needed.
+
+2. Convert from polygon rasterizers to triangle rasterizers.
+
+3. Implement non-point-sampled polygon/triangle rasterizers and extend
+   the glHint() function with GL_MESA_POLYGON_SAMPLING such that
+   GL_FASTEST indicates non-point sampling and GL_NICEST/GL_DONT_CARE
+   indicates point sampling.  Also, an environment variable override.
+
+4. Implement a "generational" depth buffer which only has to be cleared
+   once every 'n' frames.
+
+5. Remove MESA_ALPHA environment variable.
+
+
+
+Version History
+===============
+
+1.0 beta   February 1995
+    Initial release
+
+1.1 beta   March 4, 1995
+    Many improvements:
+	- faster point and line drawing (2x faster)
+	- more systems supported, better Makefiles
+	- many small bug fixes
+	- pseudo-GLX functions added
+	- GLUT support
+	- new implementation of evaluators (eval2.c)
+	- Renamed lib*.a files to avoid collisions
+
+1.1.1 beta   March 7, 1995
+    Reverted from eval2.c to eval.c due to FPE on Linux
+    more speed improvements
+    more Makefile changes
+
+1.1.2 beta   March 14, 1995
+    Using eval2.c again
+    more FPE-prevention checks (0-length normals are OK)
+    a few small bug fixes
+    much faster pixel logic ops!
+    faster transformation arithmetic
+    implementation of SGI's blending extensions
+    glXUseXFont implemented
+    added MESA_DEBUG environment variable support
+
+1.1.3 beta   March 31, 1995
+    gluScaleImage() and gluBuild2DMipMaps() implemented
+    Mesa widgets for Xt/Motif
+    more bug fixes
+    blendEXT demos
+    added environment variables for selecting visuals
+    almost all GLUT demos work correctly now
+    faster X device driver functions
+
+1.1.4 beta   April 20, 1995
+    Bug fixes:
+	- missing #define SEEK_SET in src-tk/image.c
+	- compile glShadeModel into display lists
+	- fixed pow() domain error in src/light.c
+	- fixed "flickering bitmaps" in double buffer mode
+	- fixed tk.h and aux.h for C++
+	- state of LIGHT_MODEL_LOCAL_VIEWER was inverted
+    New features:
+	- MUCH, MUCH nicer dithering in 8-bit RGB mode
+	- updated widgets and widget demos
+	- Implemented GLXPixmap functions
+	- Added GLU 1.1 and GLX 1.1 functions
+	- Changed the X/Mesa interface API, more versatile
+	- Implemented gluPartialDisk()
+
+1.2   May 22, 1995
+    Bug fixes:
+	- IRIX 4.x makefile problem
+	- modified tk to share root colormap as needed
+	- gluLookAt normalization problem
+	- suppress Expose, NoExpose events in swapbuffers
+	- glBitmap() and glDrawPixels() clipping
+    New features:
+	- GL_BLEND, GL_MODULATE, GL_DECAL, and GL_REPLACE_EXT texture
+	      modes implemented
+	- texture maps stored more efficiently
+	- texture maps can be compiled into display lists
+	- Bogdan Sikorski's GLU polygon tesselation code
+	- Linas Vepstas's sweep and extrusion library
+	- glXCreateContext()'s shareList parameter works as it's supposed to.
+	      XMesaCreateContext() updated to accept a shareList parameter too.
+	- Mesa can be compiled with real OpenGL .h files
+	- MESA_BACK_BUFFER environment variable
+	- better GLX error checking
+
+1.2.1   June 22, 1995
+    Bug fixes:
+	- X/Mesa double buffer window resize crash
+	- widgets now pass PointerMotion events
+	- X/Mesa incorrect default clear color and drawing color
+	- more robust X MIT-SHM support in X/Mesa
+	- glTexImage( format=GL_LUMINANCE ) didn't work
+	- GL_LINE mode polygons with line width > 1.0 could cause a crash
+	- numerous feedback bugs
+	- glReadPixels() from depth buffer was wrong
+	- error prone depth and stencil buffer allocation
+    New features:
+	- Preliminary Microsoft Windows driver
+	- Implemented a number of missing functions: glEvalCoord[12][df]v(),
+	    glGet...(), etc.
+	- Added a few missing symbols to gl.h and glu.h
+	- Faster rendering of smooth-shaded, RGBA, depth-buffered polygons.
+	- Faster rendering of lines when width=2.0
+	- Stencil-related functions now work in display lists
+    Changes:
+	- renamed aux.h as glaux.h (MS-DOS names can't start with aux)
+	- most filenames are in 8.3 format to accomodate MS-DOS
+	- use GLubytes to store arrays of colors instead of GLints
+
+1.2.2   August 2, 1995
+    New features:
+	- texture mapped points and lines
+	- NURBS! (but not 100% complete)
+	- viewports may safely extend beyond window boundaries
+	- MESA_PRIVATE_CMAP environment variable
+	- Grayscale X display support
+	- two new demos:  demos/gears.c and demos/shadow.c
+	- MachTen for Macintosh configuration
+    Bug fixes:
+	- glGet*(GL_DEPTH_BITS) returned bytes, not bits
+	- point, line, and bitmap rasterization suffered from roundoff errors
+	- fixed a division by zero error in line clippping
+	- occasional wrong default background color really fixed!
+	- glDepthFunc(GL_ALWAYS) with glDepthMask(GL_FALSE) didn't work
+	- gluBuild2DMipmaps malloc problem fixed
+	- view volume clipping of smooth shaded lines resulted in bad colors
+    Changes:
+	- new visual selection method in glXChooseVisual()
+	- improved GLU quadric functions
+	- call XSync for glFinish and XFlush for glFlush
+	- glVertex() calls now use a function pointer to avoid conditionals
+	- removed contrib directory from Mesa tar file (available on ftp site)
+	- AIX shared library support
+	- Removed GLUenum type as it's not in OpenGL
+
+1.2.3   September 26, 1995
+    New features:
+	- Mesa header files now equivalent to SGI OpenGL headers
+	- Support for HP's Color Recovery dithering displays
+	- Faster vertex transformation
+	- Faster raster operations into X windows under certain conditions
+	- New configurations:  HP w/ shared libs, Ultrix w/ GCC, Data General
+	- 4-bit visuals now supported
+    Bug fixes:
+	- glScissor bug fixed
+	- round-off errors in clipping lines against clip planes fixed
+	- byte swapping between hosts and display servers implemented
+	- glGetError() can be called without a current rendering context
+	- problem with accidentally culled polygons is fixed
+	- fixed some widget compilation problems
+
+1.2.4   November 17, 1995
+    New features:
+	- More speed improvements (lighting, fogging, polygon drawing)
+	- Window system and OS-independent off-screen rendering
+	- Preliminary Fortran bindings
+	- glPolygonOffsetEXT implemented
+	- glColorMask and glIndexMask now fully implemented
+	- glPixelZoom implemented
+	- display lists fully implemented
+	- gamma correction
+	- dithering in 8-bit TrueColor/DirectColor visuals
+    Changes:
+	- Improved device driver interface
+	- tk.h renamed to gltk.h to avoid conflicts with Tcl's Tk
+	- Dithering support moved from core into device driver
+    Bug fixes:
+	- glEnable/Disable( GL_LIGHTING ) didn't always take effect
+	- glReadPixels byte swapping was broken
+	- glMaterial with pname==GL_AMBIENT_AND_DIFFUSE was broken
+	- duplicate glColor4b() prototype in GL/gl.h removed
+	- stripes in wave -ci demo fixed
+	- GL_LINEAR_MIPMAP_NEAREST had wrong value
+	- bugs in HP Color Recovery support fixed
+	- fixed bug when blending lines, points, bitmaps outside of window
+
+1.2.5   November 30, 1995
+    New Features:
+	- updated MS Windows driver
+	- new implementation of StaticGray/GrayScale visual support
+    Bug fixes:
+	- pixelzooming with gamma correction or blending didn't work
+	- HP color recovery visual wasn't being picked by glXChooseVisual
+	- glClear didn't always observe glColorMask changes
+	- olympic and offset demos didn't compile on some Suns
+	- texcoord clamping wasn't correct
+	- a polygon optimization introduced an occasional sampling problem
+
+1.2.6   January 26, 1996
+    New Features:
+	- faster line and polygon rendering under certain conditions.  See
+	  "Performance tip" number 9, above.
+	- profiling
+	- lighting is a bit faster
+	- better perspective corrected texture mapping
+	- Amiga AmiWin (X11) support
+	- preliminary Linux SVGA driver
+    Changes:
+	- now using a 16-bit depth buffer, faster, smaller
+	- GL_NORMALIZE is disabled by default
+    Bug fixes:
+	- projective texture mapping
+	- fixed a memory leak in the context destroy function
+	- GL_POLYGON with less than 3 vertices caused a crash
+	- glGet*() returned wrong result for GL_INDEX_MODE
+	- reading pixels from an unmapped X window caused a BadMatch error
+
+1.2.7   March 5, 1996
+    New:
+	- faster lighting
+	- faster 16-bit TrueColor rendering on Linux
+	- faster 32-bit TrueColor rendering on Linux, HP, IBM
+	- non-depth-buffered XImage polygons are faster
+	- vertex array extension
+	- software alpha planes
+	- updated Macintosh driver
+	- new NeXT driver
+	- GLU quadric functions generate texture coordinates
+	- reflect.c demo - reflective, textured surface demo
+    Changes:
+	- gamma correction code moved into the X driver for better performance
+    Bug fixes:
+	- multiple glClipPlane()'s didn't work reliably
+	- glPolygonMode() didn't always work
+	- glCullFace( GL_FRONT_AND_BACK ) didn't work
+	- texture mapping with gamma correction was buggy
+	- floating point exceptions in texture coordinate interpolation
+	- XImage byte swapping didn't always work
+	- polygon edge flags weren't always used correctly
+
+1.2.8   May 22, 1996
+    New:
+	- overlay planes on X servers with the SERVER_OVERLAY_VISUALS property
+	- better monochrome output
+	- more IRIX 6.x configurations
+	- more robust RGB mode color allocation
+	- added MESA_XSYNC environment variable
+	- GLX_MESA_pixmap_colormap and GLX_EXT_visual_info extensions
+	- GL_MESA_window_pos extension
+	- faster glReadPixels/glDrawPixels for GL_DEPTH and GL_UNSIGNED_SHORT
+	  and GL_UNSIGNED_INT
+        - driver for prototype Cirrus Mondello 3-D board
+	- updated AmigaDOS driver
+        - a few small speed optimizations in polygon rendering
+    Changes:
+	- internal device driver interface modified to simplify device
+	  driver implementations and to support hardware Z buffers
+	- several changes to the X/Mesa interface (xmesa.h)
+    Bug fixes:
+	- fixed pow(0,0) domain error triggered on some systems
+	- glStencilClear() in a display list caused an infinite loop
+	- glRasterPos*() was sometimes off by +/-0.5 in X and Y
+	- color masking and blending were performed in wrong order
+	- auxSolidCylinder() sometimes drew a wire-frame cylinder
+	- fixed file writing bug in osdemo.c
+	- pixel mapping didn't always work
+	- the GL_GEQUAL stencil func didn't work
+	- the GL_INVERT stencil op didn't work
+	- the stencil write mask didn't work
+	- glPush/PopAttrib() didn't do enough error checking
+	- glIsList() didn't always work correctly
+
+
+
+Why is it the library called Mesa?
+==================================
+
+Why not?  More obvious names were considered but had to be rejected:
+FreeGL (too similar to the trademarked name OpenGL), Free3D (too similar
+to DEC's Open3D).  Also, I'm tired of acronyms.
+
+[I've recently discovered that at least two other software products use the
+name Mesa.  A name change may be necessary in the future.  Suggestions are
+welcome!]
+
+
+
+Thanks to
+=========
+
+Erich Stefan Boleyn - for the glRotate code and testing early Mesa
+Joe Kiniry, Kendall Bennett - for opinions and discussion
+Marc Buffat - for the gluProject and gluUnproject functions
+Bernd Barsuhn, Volker Weiss - for the new implementation of evaluators
+Philip Brown - for the initial GLX, GLUT implementation
+Thorsten Ohl - for glXUseXFont() and glBitmap bug fixes
+Thomas Malik - for new invert_matrix and other xform.c code
+Michael Pichler - for X colormap code and numerous bug reports/fixes
+Thorsten Ohl, Jeroen van der Zijp - for the Xt/Motif widgets
+Bob Mercier - for the new 8-bit RGB dithering code
+Pedro Vazquez - for establishing the Mesa mailing list
+Bogdan Sikorski - for the GLU polygon tesselation code and NURBS
+Linas Vepstas - for his extrusion and swept surface library
+Frederic Devernay - for improved X shared memory support
+Asif Khan - for bringing _many_ subtle bugs to my attention
+Mark Peterson - for the MS Windows driver for Mesa
+Gene Lett and Kerris Renkin - for diagnosing several rasterization problems
+Alex De Bruyn - for HP Color Recovery display support
+Miklos Fazekas - for the Macintosh driver
+Frederic Devernay - for many Sun configs and lots of useful feedback
+Victor Ng-Thow-Hing - for the Amiga AmiWin port
+Bill Triggs - improved texture mapping features
+Martin Bernhard - added texture coordinate generation to GLU quadric functions
+Pascal Thibaudeau - NeXT support
+Jean-Luc Daems, Jacques Leroy - numerous optimization in Mesa 1.2.7
+Joerg Hessdoerfer - 16-bit TrueColor optimizations in Mesa 1.2.7
+Stefan Zivkovic - for the Amiga driver
+Peter McDermott - for the Cirrus Logic Mondello driver
+
+Your contributions are greatly appreciated!
+
+
+This file last revised:  May 22, 1996

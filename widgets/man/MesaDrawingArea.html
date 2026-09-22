@@ -1,0 +1,86 @@
+<!-- $RCSfile$$Revision$$Date$ -->
+<!-- $Log$ -->
+<HTML>
+<TITLE> MESADRAWINGAREA </TITLE>
+<h2>NAME</h2>
+MesaDrawingArea - An Xt widget for Mesa/X with richer semantics
+<p><h2>DESCRIPTION</h2>
+The <I>MesaDrawingArea</I> widget is an extension of the <I>GLwDrawingArea</I>
+widget which takes advantage of some features of the <B>Mesa/X</B>
+implementation of the <B>OpenGL</B> API.  
+<p>It also simplifies programming by associating a drawing context
+transparently to the widget.  This feature is particulary convenient
+in applications that have to deal with multiple instances of a
+<I>MesaDrawingArea</I> widget.
+<p><h2>Resources</h2>
+The following X resources are available in addition to the
+<I>GLwDrawingArea</I> resources:
+<p><pre>
+      ___________________________________________________________________________
+      |                    |                    |         |                      |
+      | Name               | Class              | Type    | OpenGL attribute     |
+      |____________________|____________________|_________|______________________|
+      |                    |                    |         |                      |
+      | GLwNximage         | GLwCXImage         | Boolean | N/A                  |
+      |____________________|____________________|_________|______________________|
+      |                    |                    |         |                      |
+      | GLwNshareLists     | GLwCShareLists     | Boolean | N/A                  |
+      |____________________|____________________|_________|______________________|
+      |                    |                    |         |                      |
+      | GLwNshareListsWith | GLwCShareListsWith | Widget  | N/A                  |
+      |____________________|____________________|_________|______________________|
+</pre>
+
+<dl>
+
+<A NAME="MesaDrawingArea_76"></A>
+<dt><B>Boolean ximage</B> </dt>
+<dd>
+Is <I>False</I> by default, setting it to <I>True</I> will cause <B>Mesa/X</B> to
+use an Ximage (in contrast to a pixmap) as second buffer.
+<p></dd>
+<p>
+<dt><B>Boolean shareLists</B> </dt>
+<dd>
+Is <I>False</I> by default, setting it to <I>True</I> will cause <B>Mesa/X</B> to
+share display lists among all widgets that have this ressource set to
+<I>True</I>.
+<p></dd>
+<p>
+<dt><B>Boolean shareListsWith</B> </dt>
+<dd>
+<B>[Caveat: This resource is not honored yet.]</B>
+<p></dd>
+<p>
+Is <I>NULL</I> by default, setting it to another <I>MesaDrawingArea</I> widget
+will cause the two widgets to share display lists.
+<p>
+</dl>
+
+<h2>Utility functions</h2>
+The following utility functions are available
+<p>
+<dl>
+
+<A NAME="MesaWorkstation_45"></A>
+<dt><B>void GLwMakeCurrent (Widget w)</B> </dt>
+<dd>
+switches the <B>Mesa/X</B> context to the one associated to the widget <I>w</I>.
+<p></dd>
+<p>
+
+</dl>
+
+<h2>SEE ALSO</h2>
+
+<A HREF="file://localhost/home/ohl/c/widgets/man/GLwDrawingArea.html">
+the GLwDrawingArea manpage</A>
+, 
+<A HREF="file://localhost/home/ohl/c/widgets/man/MesaWorkstation.html">
+the MesaWorkstation manpage</A>
+
+<p><h2>AUTHOR</h2>
+Thorsten.Ohl @ Physik.TH-Darmstadt.de
+<p><h2>DATE</h2>
+$Id: MesaDrawingArea.pod,v 1.5 1995/05/19 20:31:00 ohl Exp $<p>
+</HTML>

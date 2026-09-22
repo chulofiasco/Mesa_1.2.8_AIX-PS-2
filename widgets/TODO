@@ -1,0 +1,40 @@
+Some of the things hat need to be done:
+
+GLwDrawingArea:
+***************
+
+  * Handle all resources, conform to the manpage.
+
+
+MesaDrawingArea:
+****************
+
+  * Add Motif support.
+
+  * Implement the shareListWith resource
+
+MesaWorkstation:
+****************
+
+  * Add Motif support.
+
+  * Rethink the geometry for views to make sure it is intuitive.
+
+  * Sanitize the translations for controlling parametrized views.
+
+  * Maybe implement a MapleV style viewing cube.
+
+  * Rethink Redraw events to find a way for adding backing store.
+
+
+Documentation:
+**************
+
+  * As always :-( ...
+
+
+
+$Id: TODO,v 1.8 1995/05/19 20:30:56 ohl Exp $
+Local Variables:
+mode:indented-text
+End:
