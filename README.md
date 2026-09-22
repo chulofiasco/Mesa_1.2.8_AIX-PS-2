@@ -41,7 +41,8 @@ make install-book
 ```
 Build time on a Model 90 with a Pentium 66 Complex:
 
-```real    49:50.95
+```
+real    49:50.95
 user     8:58.91
 sys     16:56.23
 ```
