@@ -57,24 +57,27 @@ GLfloat ctrlpoints[4][4][3] = {
 
 void display(void)
 {
-    int i, j;
+    volatile long i, j;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0, 1.0, 1.0);
     glPushMatrix ();
     glRotatef(85.0, 1.0, 1.0, 1.0);
     for (j = 0; j <= 8; j++) {
-	glBegin(GL_LINE_STRIP);
-        for (i = 0; i <= 30; i++)
-	    glEvalCoord2f((GLfloat)i/30.0, (GLfloat)j/8.0);
-	glEnd();
-	glBegin(GL_LINE_STRIP);
-        for (i = 0; i <= 30; i++)
-	    glEvalCoord2f((GLfloat)j/8.0, (GLfloat)i/30.0);
-	glEnd();
+        int index_i = i;
+        int index_j = j;
+        glBegin(GL_LINE_STRIP);
+        for (index_i = 0; index_i <= 30; index_i++)
+            glEvalCoord2f((GLfloat)index_i/30.0, (GLfloat)index_j/8.0);
+        glEnd();
+        glBegin(GL_LINE_STRIP);
+        for (index_i = 0; index_i <= 30; index_i++)
+            glEvalCoord2f((GLfloat)index_i/30.0, (GLfloat)index_j/8.0);
+        glEnd();
     }
     glPopMatrix ();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myinit(void)
@@ -105,7 +108,7 @@ void myReshape(int w, int h)
 
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();

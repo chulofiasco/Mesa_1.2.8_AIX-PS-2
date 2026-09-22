@@ -149,7 +149,8 @@ void display(void)
     glTranslatef(10.0, 13.0, 0.0);
     printStrokedString(test2);
     glPopMatrix();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 /*  Main Loop
@@ -158,7 +159,7 @@ void display(void)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 440, 120);
     auxInitWindow (argv[0]);
     myinit ();

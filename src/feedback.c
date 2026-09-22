@@ -361,7 +361,7 @@ void glPopName( void )
 
 GLint glRenderMode( GLenum mode )
 {
-   GLint result;
+   GLint result = 0;
 
    if (INSIDE_BEGIN_END) {
       gl_error( GL_INVALID_OPERATION, "glInitNames" );

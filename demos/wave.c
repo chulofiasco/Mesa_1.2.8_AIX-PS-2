@@ -90,9 +90,7 @@ static void Animate(void)
 {
     struct coord *coord;
     struct facet *facet;
-    float *lastColor;
-    float *thisColor;
-    GLint i, j;
+    volatile long i, j;
 
     glClear(clearMask);
 
@@ -110,62 +108,51 @@ static void Animate(void)
 
     for (i = 0; i < theMesh.widthX; i++) {
 	glBegin(GL_QUAD_STRIP);
-	lastColor = NULL;
-	for (j = 0; j < theMesh.widthY; j++) {
-	    facet = GETFACET(curFrame, i, j);
-	    if (!smooth && lighting) {
-		glNormal3fv(facet->normal);
-	    }
-	    if (lighting) {
-		if (rgb) {
-		    thisColor = facet->color;
-		    glColor3fv(facet->color);
-		} else {
-		    thisColor = facet->color;
-		    glMaterialfv(GL_FRONT_AND_BACK, GL_COLOR_INDEXES, 
-				 facet->color);
+	for (j = 0; j <= theMesh.widthY; j++) {
+	    
+	    /* Set flat normal and color for the quad.
+	       SGI originally placed this at j=0..widthY-1, which incorrectly 
+	       shifted the provoking vertex colors and caused out-of-bounds normal 
+	       reads on the last quad. We align it to j=1..widthY. */
+	    /* Set flat normal and color for the quad. */
+	    if (j > 0) {
+		facet = GETFACET(curFrame, i, j - 1);
+		if (!smooth && lighting) {
+		    glNormal3fv(facet->normal);
+		    /* The High C compiler clobbers the 'facet' pointer during the glNormal3fv call! 
+		       We MUST explicitly reload it before the next OpenGL call reads from it. */
+		    facet = GETFACET(curFrame, i, j - 1);
 		}
-	    } else {
-		if (rgb) {
-		    thisColor = facet->color;
-		    glColor3fv(facet->color);
+		if (lighting) {
+		    if (rgb) {
+			glColor3fv(facet->color);
+		    } else {
+			glMaterialfv(GL_FRONT_AND_BACK, GL_COLOR_INDEXES, facet->color);
+		    }
 		} else {
-		    thisColor = facet->color;
-		    glIndexf(facet->color[1]);
+		    if (rgb) {
+			glColor3fv(facet->color);
+		    } else {
+			glIndexf(facet->color[1]);
+		    }
 		}
 	    }
 
-	    if (!lastColor || (thisColor[0] != lastColor[0] && smooth)) {
-		if (lastColor) {
-		    glEnd();
-		    glBegin(GL_QUAD_STRIP);
-		}
+	    coord = GETCOORD(curFrame, i, j);
+	    if (smooth && lighting) {
+		glNormal3fv(coord->normal);
+		/* Reload pointer after function call! */
 		coord = GETCOORD(curFrame, i, j);
-		if (smooth && lighting) {
-		    glNormal3fv(coord->normal);
-		}
-		glVertex3fv(coord->vertex);
+	    }
+	    glVertex3fv(coord->vertex);
 
+	    coord = GETCOORD(curFrame, i+1, j);
+	    if (smooth && lighting) {
+		glNormal3fv(coord->normal);
+		/* Reload pointer after function call! */
 		coord = GETCOORD(curFrame, i+1, j);
-		if (smooth && lighting) {
-		    glNormal3fv(coord->normal);
-		}
-		glVertex3fv(coord->vertex);
-	    }
-
-	    coord = GETCOORD(curFrame, i, j+1);
-	    if (smooth && lighting) {
-		glNormal3fv(coord->normal);
 	    }
 	    glVertex3fv(coord->vertex);
-
-	    coord = GETCOORD(curFrame, i+1, j+1);
-	    if (smooth && lighting) {
-		glNormal3fv(coord->normal);
-	    }
-	    glVertex3fv(coord->vertex);
-
-	    lastColor = thisColor;
 	}
 	glEnd();
     }
@@ -180,9 +167,9 @@ static void SetColorMap(void)
 {
     static float green[3] = {0.2, 1.0, 0.2};
     static float red[3] = {1.0, 0.2, 0.2};
-    float *color, percent;
-    GLint *indexes, entries, i, j;
-    long buf[4];
+    float *color = NULL, percent;
+    GLint *indexes = NULL, entries;
+    volatile long i, j;
 
     entries = tkGetColorMapSize();
 
@@ -226,8 +213,9 @@ static void InitMesh(void)
     struct facet *facet;
     float dp1[3], dp2[3];
     float *pt1, *pt2, *pt3;
-    float angle, d, x, y;
-    GLint numFacets, numCoords, frameNum, i, j;
+    volatile float angle, d, x, y;
+    GLint numFacets, numCoords;
+    volatile long frameNum, i, j;
 
     theMesh.widthX = widthX;
     theMesh.widthY = widthY;
@@ -260,17 +248,24 @@ static void InitMesh(void)
 		}
 		angle = 2 * PI * d + (2 * PI / frames * frameNum);
 
-		coord = GETCOORD(frameNum, i, j);
+		/* Calculate these values BEFORE getting the coord pointer, because 
+		   the cos() and sin() function calls will silently clobber any 
+		   pointers held in caller-saved registers! */
+		{
+		    float z_val = (height - height * d) * cos(angle);
+		    float nx_val = -(height / d) * x * ((1 - d) * 2 * PI * sin(angle) + cos(angle));
+		    float ny_val = -(height / d) * y * ((1 - d) * 2 * PI * sin(angle) + cos(angle));
 
-		coord->vertex[0] = x - 0.5;
-		coord->vertex[1] = y - 0.5;
-		coord->vertex[2] = (height - height * d) * cos(angle);
+		    coord = GETCOORD(frameNum, i, j);
 
-		coord->normal[0] = -(height / d) * x * ((1 - d) * 2 * PI *
-				   sin(angle) + cos(angle));
-		coord->normal[1] = -(height / d) * y * ((1 - d) * 2 * PI *
-				   sin(angle) + cos(angle));
-		coord->normal[2] = -1;
+		    coord->vertex[0] = x - 0.5;
+		    coord->vertex[1] = y - 0.5;
+		    coord->vertex[2] = z_val;
+
+		    coord->normal[0] = nx_val;
+		    coord->normal[1] = ny_val;
+		    coord->normal[2] = -1;
+		}
 
 		d = 1.0 / sqrt(coord->normal[0]*coord->normal[0]+
 			       coord->normal[1]*coord->normal[1]+1);
@@ -346,7 +341,7 @@ static void InitMaterials(void)
     static float lmodel_twoside[] = {GL_TRUE};
 
     glMatrixMode(GL_PROJECTION);
-    gluPerspective(450, 1.0, 0.5, 10.0);
+    gluPerspective(450.0, 1.0, 0.5, 10.0);
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
@@ -376,11 +371,11 @@ static void InitMaterials(void)
 static void InitTexture(void)
 {
 
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 static void Init(void)
@@ -509,7 +504,7 @@ static GLenum Key(int key, GLenum mask)
 
 static GLenum Args(int argc, char **argv)
 {
-    GLint i;
+    volatile long i;
 
     rgb = GL_TRUE;
     doubleBuffer = GL_TRUE;

@@ -61,6 +61,7 @@ typedef struct _vertexRec {
 
 GLenum doubleBuffer, directRender;
 int imageSizeX, imageSizeY;
+int windowWidth, windowHeight;
 char *fileName = 0;
 TK_RGBImageRec *image;
 cRec cList[50];
@@ -71,24 +72,24 @@ GLenum op = OP_NOOP;
 
 void DrawImage(void)
 {
-
-    glRasterPos2i(0, 0);
-    glDrawPixels(image->sizeX, image->sizeY, GL_RGB, GL_UNSIGNED_BYTE,
-		 image->data);
+    glEnable(GL_TEXTURE_2D);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex2f(0.0, 0.0);
+    glTexCoord2f(1.0, 0.0); glVertex2f((float)windowWidth, 0.0);
+    glTexCoord2f(1.0, 1.0); glVertex2f((float)windowWidth, (float)windowHeight);
+    glTexCoord2f(0.0, 1.0); glVertex2f(0.0, (float)windowHeight);
+    glEnd();
+    glDisable(GL_TEXTURE_2D);
 
     glFlush();
     if (doubleBuffer) {
 	tkSwapBuffers();
     }
-
-    glRasterPos2i(0, 0);
-    glDrawPixels(image->sizeX, image->sizeY, GL_RGB, GL_UNSIGNED_BYTE,
-		 image->data);
 }
 
 void DrawPoint(void)
 {
-    int i;
+    volatile long i;
 
     glColor3f(1.0, 0.0, 1.0);
     glPointSize(3.0);
@@ -114,22 +115,22 @@ void InitVList(void)
     vList[0].tX = 0.0;
     vList[0].tY = 0.0;
 
-    vList[1].x = (float)imageSizeX;
+    vList[1].x = (float)windowWidth;
     vList[1].y = 0.0;
     vList[1].dX = 0.0;
     vList[1].dY = 0.0;
     vList[1].tX = 1.0;
     vList[1].tY = 0.0;
 
-    vList[2].x = (float)imageSizeX;
-    vList[2].y = (float)imageSizeY;
+    vList[2].x = (float)windowWidth;
+    vList[2].y = (float)windowHeight;
     vList[2].dX = 0.0;
     vList[2].dY = 0.0;
     vList[2].tX = 1.0;
     vList[2].tY = 1.0;
 
     vList[3].x = 0.0;
-    vList[3].y = (float)imageSizeY;
+    vList[3].y = (float)windowHeight;
     vList[3].dX = 0.0;
     vList[3].dY = 0.0;
     vList[3].tX = 0.0;
@@ -139,8 +140,8 @@ void InitVList(void)
     vList[4].y = cList[0].y;
     vList[4].dX = (cList[1].x - cList[0].x) / STEPCOUNT;
     vList[4].dY = (cList[1].y - cList[0].y) / STEPCOUNT;
-    vList[4].tX = cList[0].x / (float)imageSizeX;
-    vList[4].tY = cList[0].y / (float)imageSizeY;
+    vList[4].tX = cList[0].x / (float)windowWidth;
+    vList[4].tY = cList[0].y / (float)windowHeight;
 }
 
 void ScaleImage(int sizeX, int sizeY)
@@ -254,10 +255,29 @@ GLenum Mouse(int mouseX, int mouseY, GLenum button)
 	cCount = 0;
 	op = OP_DRAWIMAGE;
     } else {
-	SetPoint(mouseX, imageSizeY-mouseY);
+	SetPoint(mouseX, windowHeight-mouseY);
 	op = OP_DRAWPOINT;
     }
     return GL_TRUE;
+}
+
+void Reshape(int width, int height)
+{
+    windowWidth = width;
+    windowHeight = height;
+    glViewport(0, 0, width, height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D((GLdouble)0, (GLdouble)width, (GLdouble)0, (GLdouble)height);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    if (op == OP_DRAWIMAGE || op == OP_DRAWPOINT) {
+        DrawImage();
+        if (op == OP_DRAWPOINT) {
+            DrawPoint();
+        }
+    }
 }
 
 void Animate(void)
@@ -278,7 +298,7 @@ void Animate(void)
 
 static GLenum Args(int argc, char **argv)
 {
-    GLint i;
+    volatile long i;
 
     doubleBuffer = GL_FALSE;
     directRender = GL_TRUE;
@@ -323,8 +343,8 @@ void main(int argc, char **argv)
     image = tkRGBImageLoad(fileName);
 
     /* changed powf and logf to pow and log -Brian */
-    imageSizeX = (int)pow(2.0, (float)((int)(log(image->sizeX)/log(2.0))));
-    imageSizeY = (int)pow(2.0, (float)((int)(log(image->sizeY)/log(2.0))));
+    imageSizeX = (int)(pow(2.0, (double)((int)(log((double)image->sizeX)/log(2.0)))) + 0.5);
+    imageSizeY = (int)(pow(2.0, (double)((int)(log((double)image->sizeY)/log(2.0)))) + 0.5);
 
     tkInitPosition(0, 0, imageSizeX, imageSizeY);
 
@@ -336,9 +356,10 @@ void main(int argc, char **argv)
     if (tkInitWindow("Stretch") == GL_FALSE) {
         tkQuit();
     }
+    
+    windowWidth = imageSizeX;
+    windowHeight = imageSizeY;
 
-    glViewport(0, 0, imageSizeX, imageSizeY);
-    gluOrtho2D(0, imageSizeX, 0, imageSizeY);
     glClearColor(0.0, 0.0, 0.0, 0.0);
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -360,8 +381,9 @@ void main(int argc, char **argv)
     cStep = 0;
     op = OP_DRAWIMAGE;
 
-    tkKeyDownFunc(Key);
-    tkMouseDownFunc(Mouse);
     tkIdleFunc(Animate);
+    tkReshapeFunc(Reshape);
+    tkMouseDownFunc(Mouse);
+    tkKeyDownFunc(Key);
     tkExec();
 }

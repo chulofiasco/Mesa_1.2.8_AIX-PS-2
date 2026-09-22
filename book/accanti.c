@@ -113,12 +113,13 @@ void displayObjects(void)
 void display(void)
 {
     GLint viewport[4];
-    int jitter;
+    volatile int jitter;
 
     glGetIntegerv (GL_VIEWPORT, viewport);
 
     glClear(GL_ACCUM_BUFFER_BIT);
     for (jitter = 0; jitter < ACSIZE; jitter++) {
+        int j = jitter;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPushMatrix ();
 /*	Note that 4.5 is the distance in world space between
@@ -126,14 +127,15 @@ void display(void)
  *	This formula converts fractional pixel movement to 
  *	world coordinates.
  */
-	glTranslatef (j8[jitter].x*4.5/viewport[2],
-	    j8[jitter].y*4.5/viewport[3], 0.0);
+	glTranslatef (j8[j].x*4.5/viewport[2],
+	    j8[j].y*4.5/viewport[3], 0.0);
 	displayObjects ();
 	glPopMatrix ();
 	glAccum(GL_ACCUM, 1.0/ACSIZE);
     }
     glAccum (GL_RETURN, 1.0);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -154,7 +156,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB
 			| AUX_ACCUM | AUX_DEPTH);
     auxInitPosition (0, 0, 250, 250);
     auxInitWindow (argv[0]);

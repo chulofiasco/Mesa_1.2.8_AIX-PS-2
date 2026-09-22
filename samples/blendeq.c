@@ -65,8 +65,8 @@ static GLenum Key(int key, GLenum mask)
 
 static void PrintColorStrings( void )
 {
-    GLubyte ubbuf[3], ubcolor[3];
-    int i, xleft, xright;
+    GLubyte ubbuf[3];
+    volatile long i, xleft, xright;
     char colorString[18];
 
     xleft = 5 + windW/4;
@@ -88,11 +88,7 @@ static void PrintColorStrings( void )
 
 static void Draw(void)
 {
-    float xscale, yscale;
-    GLfloat x, y;
-    int i, j;
-    GLfloat buf[3];
-    GLubyte ubbuf[3], ubcolor[3];
+    volatile long i;
     int stringOffset = 5, stringx = 8;
     int x1, x2, xleft, xright;
 
@@ -229,7 +225,7 @@ static void Draw(void)
 
 static GLenum Args(int argc, char **argv)
 {
-    GLint i;
+    volatile long i;
 
     doubleBuffer = GL_FALSE;
     directRender = GL_TRUE;

@@ -49,17 +49,47 @@
  *  alters the modeling transformation (x rotation) by 30 degrees.  
  *  The scene is then redrawn with the light in a new position.
  */
+#include <stdio.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdlib.h>
 #include "glaux.h"
 
 static int spin = 0;
+static int shape = 0;
 
 void movelight (AUX_EVENTREC *event)
 {
-    spin = (spin + 30) % 360;
+    spin = (spin + 15) % 360;
 }
+
+void movelight_back (AUX_EVENTREC *event)
+{
+    spin = (spin - 15) % 360;
+}
+
+void cycle_shape (void)
+{
+    shape = (shape + 1) % 3;
+}
+
+void set_light_color(GLfloat r, GLfloat g, GLfloat b) {
+    GLfloat diffuse[4];
+    diffuse[0] = r;
+    diffuse[1] = g;
+    diffuse[2] = b;
+    diffuse[3] = 1.0;
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, diffuse);
+}
+void color_0(void) { set_light_color(1.0, 1.0, 1.0); } /* Default/White */
+void color_1(void) { set_light_color(1.0, 0.0, 0.0); } /* Red */
+void color_2(void) { set_light_color(1.0, 0.5, 0.0); } /* Orange */
+void color_3(void) { set_light_color(1.0, 1.0, 0.0); } /* Yellow */
+void color_4(void) { set_light_color(0.0, 1.0, 0.0); } /* Green */
+void color_5(void) { set_light_color(0.0, 0.0, 1.0); } /* Blue */
+void color_6(void) { set_light_color(0.29, 0.0, 0.51); } /* Indigo */
+void color_7(void) { set_light_color(0.56, 0.0, 1.0); } /* Violet */
 
 void myinit (void)
 {
@@ -95,9 +125,20 @@ void display(void)
     glEnable (GL_LIGHTING);
     glPopMatrix ();
 
-    auxSolidTorus (0.275, 0.85);
+    if (shape == 0)
+        auxSolidTorus (0.275, 0.85);
+    else if (shape == 1)
+        auxSolidSphere (0.85);
+    else {
+        glPushMatrix();
+        glRotated(35.264, 1.0, 0.0, 0.0);
+        glRotated(45.0, 0.0, 1.0, 0.0);
+        auxSolidCube(1.2);
+        glPopMatrix();
+    }
     glPopMatrix ();
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -115,11 +156,21 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();
     auxMouseFunc (AUX_LEFTBUTTON, AUX_MOUSEDOWN, movelight);
+    auxMouseFunc (AUX_MIDDLEBUTTON, AUX_MOUSEDOWN, movelight_back);
+    auxKeyFunc (AUX_s, cycle_shape);
+    auxKeyFunc (AUX_0, color_0);
+    auxKeyFunc (AUX_1, color_1);
+    auxKeyFunc (AUX_2, color_2);
+    auxKeyFunc (AUX_3, color_3);
+    auxKeyFunc (AUX_4, color_4);
+    auxKeyFunc (AUX_5, color_5);
+    auxKeyFunc (AUX_6, color_6);
+    auxKeyFunc (AUX_7, color_7);
     auxReshapeFunc (myReshape);
     auxMainLoop(display);
 }

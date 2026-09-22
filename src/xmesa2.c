@@ -217,8 +217,19 @@ static void buffer_size( GLuint *width, GLuint *height, GLuint *depth )
    unsigned int winwidth, winheight;
    unsigned int bw, d;
 
-   XGetGeometry( XMesa->display, XMesa->frontbuffer, &root,
-		 &winx, &winy, &winwidth, &winheight, &bw, &d );
+   winwidth = XMesa->width > 0 ? XMesa->width : 300;
+   winheight = XMesa->height > 0 ? XMesa->height : 300;
+
+   if (XMesa->display && XMesa->frontbuffer) {
+      if (!XGetGeometry( XMesa->display, XMesa->frontbuffer, &root,
+		 &winx, &winy, &winwidth, &winheight, &bw, &d )) {
+         winwidth = XMesa->width > 0 ? XMesa->width : 300;
+         winheight = XMesa->height > 0 ? XMesa->height : 300;
+      }
+   }
+
+   if (winwidth > MAX_WIDTH) winwidth = MAX_WIDTH;
+   if (winheight > MAX_HEIGHT) winheight = MAX_HEIGHT;
 
    *width = winwidth;
    *height = winheight;
@@ -309,7 +320,7 @@ static void clear_index( GLuint index )
 
 static void clear_color( GLubyte r, GLubyte g, GLubyte b, GLubyte a )
 {
-   unsigned long p;
+   unsigned long p = 0;
    switch (XMesa->pixelformat) {
       case PF_INDEX:
          return;
@@ -360,7 +371,7 @@ static void set_index( GLuint index )
 /* Set current drawing color */
 static void set_color( GLubyte r, GLubyte g, GLubyte b, GLubyte a )
 {
-   register unsigned long p;
+   register unsigned long p = 0;
    switch (XMesa->pixelformat) {
       case PF_INDEX:
          return;

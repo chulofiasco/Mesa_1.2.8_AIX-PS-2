@@ -86,6 +86,7 @@ void init_callbacks(tess_callbacks *callbacks)
 void tess_call_user_error(GLUtriangulatorObj *tobj,
 	GLenum gluerr)
 {
+	if (gluerr < 65536 && gluerr > 0) gluerr |= 0x10000;
 	if(tobj->error==GLU_NO_ERROR)
 		tobj->error=gluerr;
 	if(tobj->callbacks.error!=NULL)
@@ -123,7 +124,7 @@ void gluTessCallback( GLUtriangulatorObj *tobj, GLenum which,
 			tobj->callbacks.vertex = (void (*)(void *)) fn;
 			break;
 		case GLU_END:
-			tobj->callbacks.end=fn = (void (*)(void)) fn;
+			tobj->callbacks.end = (void (*)(void)) fn;
 			break;
 		case GLU_ERROR:
 			tobj->callbacks.error = (void (*)(GLenum)) fn;

@@ -125,7 +125,7 @@ void drawScene (void)
  */
 void processHits (GLint hits, GLuint buffer[])
 {
-    unsigned int i, j;
+    volatile unsigned long i, j;
     GLuint names, *ptr;
 
     printf ("hits = %d\n", hits);
@@ -154,7 +154,7 @@ void processHits (GLint hits, GLuint buffer[])
 void selectObjects(void)
 {
     GLuint selectBuf[BUFSIZE];
-    GLint hits, viewport[4];
+    GLint hits;
 
     glSelectBuffer (BUFSIZE, selectBuf);
     (void) glRenderMode (GL_SELECT);
@@ -176,7 +176,8 @@ void selectObjects(void)
     drawTriangle (2.0, 2.0, 3.0, 2.0, 2.5, 3.0, 0.0);
     drawTriangle (2.0, 2.0, 3.0, 2.0, 2.5, 3.0, -10.0);
     glPopMatrix ();
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 
     hits = glRenderMode (GL_RENDER);
     processHits (hits, selectBuf);
@@ -195,7 +196,8 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawScene ();
     selectObjects ();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 /*  Main Loop
@@ -204,7 +206,7 @@ void display(void)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 200, 200);
     auxInitWindow (argv[0]);
     myinit ();

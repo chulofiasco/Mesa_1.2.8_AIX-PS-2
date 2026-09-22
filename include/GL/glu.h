@@ -96,115 +96,113 @@ extern "C" {
 #define GLU_FALSE  GL_FALSE
 
 
-enum {
-	/* Normal vectors */
-	GLU_SMOOTH	= 100000,
-	GLU_FLAT	= 100001,
-	GLU_NONE	= 100002,
+/* Normal vectors */
+#define GLU_SMOOTH	100000UL
+#define GLU_FLAT	100001UL
+#define GLU_NONE	100002UL
 
-	/* Quadric draw styles */
-	GLU_POINT	= 100010,
-	GLU_LINE	= 100011,
-	GLU_FILL	= 100012,
-	GLU_SILHOUETTE	= 100013,
+/* Quadric draw styles */
+#define GLU_POINT	100010UL
+#define GLU_LINE	100011UL
+#define GLU_FILL	100012UL
+#define GLU_SILHOUETTE	100013UL
 
-	/* Quadric orientation */
-	GLU_OUTSIDE	= 100020,
-	GLU_INSIDE	= 100021,
+/* Quadric orientation */
+#define GLU_OUTSIDE	100020UL
+#define GLU_INSIDE	100021UL
 
-	/* Tesselator */
-	GLU_BEGIN	= 100100,
-	GLU_VERTEX	= 100101,
-	GLU_END		= 100102,
-	GLU_ERROR	= 100103,
-	GLU_EDGE_FLAG	= 100104,
+/* Tesselator */
+#define GLU_BEGIN	100100UL
+#define GLU_VERTEX	100101UL
+#define GLU_END		100102UL
+#define GLU_ERROR	100103UL
+#define GLU_EDGE_FLAG	100104UL
 
-	/* Contour types */
-	GLU_CW		= 100120,
-	GLU_CCW		= 100121,
-	GLU_INTERIOR	= 100122,
-	GLU_EXTERIOR	= 100123,
-	GLU_UNKNOWN	= 100124,
+/* Contour types */
+#define GLU_CW		100120UL
+#define GLU_CCW		100121UL
+#define GLU_INTERIOR	100122UL
+#define GLU_EXTERIOR	100123UL
+#define GLU_UNKNOWN	100124UL
 
-	/* Tesselation errors */
-	GLU_TESS_ERROR1	= 100151,  /* missing gluEndPolygon */
-	GLU_TESS_ERROR2 = 100152,  /* missing gluBeginPolygon */
-	GLU_TESS_ERROR3 = 100153,  /* misoriented contour */
-	GLU_TESS_ERROR4 = 100154,  /* vertex/edge intersection */
-	GLU_TESS_ERROR5 = 100155,  /* misoriented or self-intersecting loops */
-	GLU_TESS_ERROR6 = 100156,  /* coincident vertices */
-	GLU_TESS_ERROR7 = 100157,  /* all vertices collinear */
-	GLU_TESS_ERROR8 = 100158,  /* intersecting edges */
-	GLU_TESS_ERROR9 = 100159,  /* not coplanar contours */
+/* Tesselation errors */
+#define GLU_TESS_ERROR1	100151UL  /* missing gluEndPolygon */
+#define GLU_TESS_ERROR2 100152UL  /* missing gluBeginPolygon */
+#define GLU_TESS_ERROR3 100153UL  /* misoriented contour */
+#define GLU_TESS_ERROR4 100154UL  /* vertex/edge intersection */
+#define GLU_TESS_ERROR5 100155UL  /* misoriented or self-intersecting loops */
+#define GLU_TESS_ERROR6 100156UL  /* coincident vertices */
+#define GLU_TESS_ERROR7 100157UL  /* all vertices collinear */
+#define GLU_TESS_ERROR8 100158UL  /* intersecting edges */
+#define GLU_TESS_ERROR9 100159UL  /* not coplanar contours */
 
-	/* NURBS */
-	GLU_AUTO_LOAD_MATRIX	= 100200,
-	GLU_CULLING		= 100201,
-	GLU_PARAMETRIC_TOLERANCE= 100202,
-	GLU_SAMPLING_TOLERANCE	= 100203,
-	GLU_DISPLAY_MODE	= 100204,
-	GLU_SAMPLING_METHOD	= 100205,
-	GLU_U_STEP		= 100206,
-	GLU_V_STEP		= 100207,
+/* NURBS */
+#define GLU_AUTO_LOAD_MATRIX	100200UL
+#define GLU_CULLING		100201UL
+#define GLU_PARAMETRIC_TOLERANCE 100202UL
+#define GLU_SAMPLING_TOLERANCE	100203UL
+#define GLU_DISPLAY_MODE	100204UL
+#define GLU_SAMPLING_METHOD	100205UL
+#define GLU_U_STEP		100206UL
+#define GLU_V_STEP		100207UL
 
-	GLU_PATH_LENGTH		= 100215,
-	GLU_PARAMETRIC_ERROR	= 100216,
-	GLU_DOMAIN_DISTANCE	= 100217,
+#define GLU_PATH_LENGTH		100215UL
+#define GLU_PARAMETRIC_ERROR	100216UL
+#define GLU_DOMAIN_DISTANCE	100217UL
 
-	GLU_MAP1_TRIM_2		= 100210,
-	GLU_MAP1_TRIM_3		= 100211,
+#define GLU_MAP1_TRIM_2		100210UL
+#define GLU_MAP1_TRIM_3		100211UL
 
-	GLU_OUTLINE_POLYGON	= 100240,
-	GLU_OUTLINE_PATCH	= 100241,
+#define GLU_OUTLINE_POLYGON	100240UL
+#define GLU_OUTLINE_PATCH	100241UL
 
-	GLU_NURBS_ERROR1  = 100251,   /* spline order un-supported */
-	GLU_NURBS_ERROR2  = 100252,   /* too few knots */
-	GLU_NURBS_ERROR3  = 100253,   /* valid knot range is empty */
-	GLU_NURBS_ERROR4  = 100254,   /* decreasing knot sequence */
-	GLU_NURBS_ERROR5  = 100255,   /* knot multiplicity > spline order */
-	GLU_NURBS_ERROR6  = 100256,   /* endcurve() must follow bgncurve() */
-	GLU_NURBS_ERROR7  = 100257,   /* bgncurve() must precede endcurve() */
-	GLU_NURBS_ERROR8  = 100258,   /* ctrlarray or knot vector is NULL */
-	GLU_NURBS_ERROR9  = 100259,   /* can't draw pwlcurves */
-	GLU_NURBS_ERROR10 = 100260,   /* missing gluNurbsCurve() */
-	GLU_NURBS_ERROR11 = 100261,   /* missing gluNurbsSurface() */
-	GLU_NURBS_ERROR12 = 100262,   /* endtrim() must precede endsurface() */
-	GLU_NURBS_ERROR13 = 100263,   /* bgnsurface() must precede endsurface() */
-	GLU_NURBS_ERROR14 = 100264,   /* curve of improper type passed as trim curve */
-	GLU_NURBS_ERROR15 = 100265,   /* bgnsurface() must precede bgntrim() */
-	GLU_NURBS_ERROR16 = 100266,   /* endtrim() must follow bgntrim() */
-	GLU_NURBS_ERROR17 = 100267,   /* bgntrim() must precede endtrim()*/
-	GLU_NURBS_ERROR18 = 100268,   /* invalid or missing trim curve*/
-	GLU_NURBS_ERROR19 = 100269,   /* bgntrim() must precede pwlcurve() */
-	GLU_NURBS_ERROR20 = 100270,   /* pwlcurve referenced twice*/
-	GLU_NURBS_ERROR21 = 100271,   /* pwlcurve and nurbscurve mixed */
-	GLU_NURBS_ERROR22 = 100272,   /* improper usage of trim data type */
-	GLU_NURBS_ERROR23 = 100273,   /* nurbscurve referenced twice */
-	GLU_NURBS_ERROR24 = 100274,   /* nurbscurve and pwlcurve mixed */
-	GLU_NURBS_ERROR25 = 100275,   /* nurbssurface referenced twice */
-	GLU_NURBS_ERROR26 = 100276,   /* invalid property */
-	GLU_NURBS_ERROR27 = 100277,   /* endsurface() must follow bgnsurface() */
-	GLU_NURBS_ERROR28 = 100278,   /* intersecting or misoriented trim curves */
-	GLU_NURBS_ERROR29 = 100279,   /* intersecting trim curves */
-	GLU_NURBS_ERROR30 = 100280,   /* UNUSED */
-	GLU_NURBS_ERROR31 = 100281,   /* unconnected trim curves */
-	GLU_NURBS_ERROR32 = 100282,   /* unknown knot error */
-	GLU_NURBS_ERROR33 = 100283,   /* negative vertex count encountered */
-	GLU_NURBS_ERROR34 = 100284,   /* negative byte-stride */
-	GLU_NURBS_ERROR35 = 100285,   /* unknown type descriptor */
-	GLU_NURBS_ERROR36 = 100286,   /* null control point reference */
-	GLU_NURBS_ERROR37 = 100287,   /* duplicate point on pwlcurve */
+#define GLU_NURBS_ERROR1  100251UL   /* spline order un-supported */
+#define GLU_NURBS_ERROR2  100252UL   /* too few knots */
+#define GLU_NURBS_ERROR3  100253UL   /* valid knot range is empty */
+#define GLU_NURBS_ERROR4  100254UL   /* decreasing knot sequence */
+#define GLU_NURBS_ERROR5  100255UL   /* knot multiplicity > spline order */
+#define GLU_NURBS_ERROR6  100256UL   /* endcurve() must follow bgncurve() */
+#define GLU_NURBS_ERROR7  100257UL   /* bgncurve() must precede endcurve() */
+#define GLU_NURBS_ERROR8  100258UL   /* ctrlarray or knot vector is NULL */
+#define GLU_NURBS_ERROR9  100259UL   /* can't draw pwlcurves */
+#define GLU_NURBS_ERROR10 100260UL   /* missing gluNurbsCurve() */
+#define GLU_NURBS_ERROR11 100261UL   /* missing gluNurbsSurface() */
+#define GLU_NURBS_ERROR12 100262UL   /* endtrim() must precede endsurface() */
+#define GLU_NURBS_ERROR13 100263UL   /* bgnsurface() must precede endsurface() */
+#define GLU_NURBS_ERROR14 100264UL   /* curve of improper type passed as trim curve */
+#define GLU_NURBS_ERROR15 100265UL   /* bgnsurface() must precede bgntrim() */
+#define GLU_NURBS_ERROR16 100266UL   /* endtrim() must follow bgntrim() */
+#define GLU_NURBS_ERROR17 100267UL   /* bgntrim() must precede endtrim()*/
+#define GLU_NURBS_ERROR18 100268UL   /* invalid or missing trim curve*/
+#define GLU_NURBS_ERROR19 100269UL   /* bgntrim() must precede pwlcurve() */
+#define GLU_NURBS_ERROR20 100270UL   /* pwlcurve referenced twice*/
+#define GLU_NURBS_ERROR21 100271UL   /* pwlcurve and nurbscurve mixed */
+#define GLU_NURBS_ERROR22 100272UL   /* improper usage of trim data type */
+#define GLU_NURBS_ERROR23 100273UL   /* nurbscurve referenced twice */
+#define GLU_NURBS_ERROR24 100274UL   /* nurbscurve and pwlcurve mixed */
+#define GLU_NURBS_ERROR25 100275UL   /* nurbssurface referenced twice */
+#define GLU_NURBS_ERROR26 100276UL   /* invalid property */
+#define GLU_NURBS_ERROR27 100277UL   /* endsurface() must follow bgnsurface() */
+#define GLU_NURBS_ERROR28 100278UL   /* intersecting or misoriented trim curves */
+#define GLU_NURBS_ERROR29 100279UL   /* intersecting trim curves */
+#define GLU_NURBS_ERROR30 100280UL   /* UNUSED */
+#define GLU_NURBS_ERROR31 100281UL   /* unconnected trim curves */
+#define GLU_NURBS_ERROR32 100282UL   /* unknown knot error */
+#define GLU_NURBS_ERROR33 100283UL   /* negative vertex count encountered */
+#define GLU_NURBS_ERROR34 100284UL   /* negative byte-stride */
+#define GLU_NURBS_ERROR35 100285UL   /* unknown type descriptor */
+#define GLU_NURBS_ERROR36 100286UL   /* null control point reference */
+#define GLU_NURBS_ERROR37 100287UL   /* duplicate point on pwlcurve */
 
-	/* Errors */
-	GLU_INVALID_ENUM		= 100900,
-	GLU_INVALID_VALUE		= 100901,
-	GLU_OUT_OF_MEMORY		= 100902,
-	GLU_INCOMPATIBLE_GL_VERSION	= 100903,
+/* Errors */
+#define GLU_INVALID_ENUM		100900UL
+#define GLU_INVALID_VALUE		100901UL
+#define GLU_OUT_OF_MEMORY		100902UL
+#define GLU_INCOMPATIBLE_GL_VERSION	100903UL
 
-	/* New in GLU 1.1 */
-	GLU_VERSION	= 100800,
-	GLU_EXTENSIONS	= 100801
-};
+/* New in GLU 1.1 */
+#define GLU_VERSION	100800UL
+#define GLU_EXTENSIONS	100801UL
 
 
 typedef struct GLUquadricObj GLUquadricObj;
@@ -298,7 +296,7 @@ extern void gluQuadricTexture( GLUquadricObj *quadObject,
 			       GLboolean textureCoords );
 
 extern void gluQuadricCallback( GLUquadricObj *qobj,
-			        GLenum which, void (*fn)() );
+			        GLenum which, void (*fn)(GLenum) );
 
 extern void gluCylinder( GLUquadricObj *qobj,
 			 GLdouble baseRadius,
@@ -367,7 +365,7 @@ extern void gluEndTrim( GLUnurbsObj *nobj );
 extern void gluPwlCurve( GLUnurbsObj *nobj, GLint count, GLfloat *array,
 			 GLint stride, GLenum type );
 
-extern void gluNurbsCallback( GLUnurbsObj *nobj, GLenum which, void (*fn)() );
+extern void gluNurbsCallback( GLUnurbsObj *nobj, GLenum which, void (*fn)(GLenum) );
 
 
 

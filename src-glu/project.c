@@ -149,7 +149,7 @@ static void invert_matrix(const GLdouble *b,GLdouble * a)
 #define MAT(m,r,c) ((m)[(c)*4+(r)])
 
   GLdouble val, val2;
-  GLint   i, j, k, ind;
+  GLint i, j, k, ind;
   GLdouble tmp[16];
 
   MEMCPY(a,identity,sizeof(double)*16);

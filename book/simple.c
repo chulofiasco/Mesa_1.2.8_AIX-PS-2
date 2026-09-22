@@ -44,7 +44,7 @@
 
 int main(int argc, char** argv)
 {
-	auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+	auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
 	auxInitPosition (0, 0, 500, 500);
 	auxInitWindow (argv[0]);
 
@@ -60,6 +60,7 @@ int main(int argc, char** argv)
 	 	glVertex2f(0.5, 0.5);
 	 	glVertex2f(0.5, -0.5);
 	glEnd();
-	glFlush();
+	glFlush();
+    auxSwapBuffers();
 	sleep (10);
 }

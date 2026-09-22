@@ -453,12 +453,19 @@ static Node *alloc_nodes( GLuint count )
 {
    Node *n;
 
+   if (!CurrentBlock) {
+      return NULL;
+   }
+
    if (CurrentPos + count + 2 > BLOCK_SIZE) {
       /* This block is full */
       n = CurrentBlock + CurrentPos;
       n[0].kind = NODE_CONTINUE;
       n[1].next = (Node *) malloc( sizeof(Node) * BLOCK_SIZE );
-      /* TODO: check for out of memory */
+      if (!n[1].next) {
+         CurrentBlock = NULL;
+         return NULL;
+      }
       CurrentBlock = (Node *) n[1].next;
       CurrentPos = 0;
    }
@@ -2025,6 +2032,18 @@ static void execute_list( GLuint list )
             VB.MonoColor = GL_FALSE;
             break;
          case NODE_BEGIN:
+            /* Force re-setup of the vertex function for each new primitive.
+             * Without this, only the first glBegin/glEnd pair in a compiled
+             * list gets setup_vertex_pointer() called (because gl_begin only
+             * calls it when VertexFunc == gl_nop_vertex).  Subsequent pairs
+             * would reuse the function from the previous pair which works in
+             * simple cases, but breaks when state has changed between frames
+             * (e.g. after glEndList resets VertexFunc to gl_nop_vertex and
+             * then between-frame state changes leave it at nop again without
+             * gl_end having reset it).  Resetting here is always safe. */
+            if (!CC.CompileFlag) {
+               CC.VertexFunc = gl_nop_vertex;
+            }
             gl_begin( n[1].e );
             break;
          case NODE_END:

@@ -684,7 +684,7 @@ static void read_color_pixels( GLint x, GLint y,
 			       GLsizei width, GLsizei height,
 			       GLenum format, GLenum type, GLvoid *pixels )
 {
-   GLint i, j, n, a, s, l, k;
+   GLint i, j, n=0, a, s, l, k;
    GLboolean scale_or_bias;
    GLfloat red[MAX_WIDTH], green[MAX_WIDTH], blue[MAX_WIDTH], alpha[MAX_WIDTH];
    GLboolean r_flag, g_flag, b_flag, a_flag, l_flag;

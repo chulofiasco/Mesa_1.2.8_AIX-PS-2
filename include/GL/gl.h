@@ -628,6 +628,12 @@ typedef enum {
   /* CenterLine C++ workaround: */
   gl_enum;
   typedef int GLenum;
+#elif defined(__HIGHC__)
+  /* MetaWare High C: C enum storage is 16-bit but GL/GLU constants
+   * (e.g. GLU_BEGIN=100100) require 32-bit range.  unsigned int is
+   * 4 bytes on HC/AIX-PS2, so use that instead of the enum type. */
+  gl_enum;
+  typedef unsigned int GLenum;
 #else
   /* all other compilers */
   GLenum;

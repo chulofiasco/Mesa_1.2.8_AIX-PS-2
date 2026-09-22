@@ -91,19 +91,27 @@ $Log: polytemp.h,v $
    GLint vert;
    GLint y, ymin, ymax;
    GLfloat yf;
+#ifdef INTERP_Z
    GLfloat dzdx;
    GLfixed fdzdx;
+#endif
    GLfloat planea = CC.PlaneA;
    GLfloat planeb = CC.PlaneB;
    GLfloat planec = 1.0F / CC.PlaneC;
    GLfloat planed = CC.PlaneD;
    GLdepth *zrow;
    GLint zrowinc = CC.BufferWidth;
+   volatile GLuint _safe_n = n;
+   GLuint * volatile _safe_vlist = vlist;
+   volatile GLuint _safe_pv = pv;
 
    /* Optional, user-supplied setup code: */
 #ifdef SETUP_CODE
    SETUP_CODE
 #endif
+   n = _safe_n;
+   vlist = _safe_vlist;
+   pv = _safe_pv;
 
 #ifdef INTERP_Z
    /* compute fixed point dz/dx */
@@ -120,11 +128,21 @@ $Log: polytemp.h,v $
    for (vert=0;vert<n;vert++) {
       GLuint j0, j1;
       GLfloat dxdy, b;
-      GLint iy0, iy1, idy;
+      GLint iy0, iy1;
       GLfloat x0, y0, x1, y1;
       GLfixed fx, fdxdy;
-      GLfixed r0, dr, g0, dg, b0, db, a0, da;
-      GLfixed i0, i1, di;
+#ifdef INTERP_COLOR
+      GLfixed r0, g0, b0;
+      GLfixed dr=0, dg=0, db=0;
+#  ifdef INTERP_ALPHA
+      GLfixed a0;
+      GLfixed da=0;
+#  endif
+#endif
+#ifdef INTERP_INDEX
+      GLfixed i0, i1;
+      GLfixed di=0;
+#endif
       GLint len;    /* vertical length of edge */
       GLint leftflag;
 
@@ -299,12 +317,23 @@ $Log: polytemp.h,v $
 
       /* render the span w/ optional color interp, depth interp */
       if (len>0) {
-         GLint iz0;
+#ifdef INTERP_Z
          GLfloat z;
          GLfixed fz;
          GLdepth *zptr;
-	 GLfixed fr, fdrdx, fg, fdgdx, fb, fdbdx, fa, fdadx;
-         GLfixed fi, fdidx;
+#endif
+#ifdef INTERP_COLOR
+         GLfixed fr, fg, fb;
+         GLfixed fdrdx=0, fdgdx=0, fdbdx=0;
+#  ifdef INTERP_ALPHA
+         GLfixed fa;
+         GLfixed fdadx=0;
+#  endif
+#endif
+#ifdef INTERP_INDEX
+         GLfixed fi;
+         GLfixed fdidx=0;
+#endif
 
 #ifdef INTERP_Z
          z = (planed - planea*xmin - planeb*yf) * planec;
@@ -345,7 +374,13 @@ $Log: polytemp.h,v $
 #endif
 
          {
+            volatile GLint safe_y = y;
+            volatile GLfloat safe_yf = yf;
+            GLdepth * volatile safe_zrow = zrow;
             INNER_CODE
+            y = safe_y;
+            yf = safe_yf;
+            zrow = safe_zrow;
          }
 
       } /* if len>0 */

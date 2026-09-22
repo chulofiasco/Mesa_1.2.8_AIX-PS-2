@@ -30,13 +30,17 @@
 #include <stdlib.h>
 #include "gltk.h"
 
-#ifdef __unix
+#include <sys/types.h>  /* required for clock_t and types used in struct tms */
 #include <sys/times.h>
 #include <sys/param.h>
+
+#ifndef HZ
+#define HZ 100    /* AIX 1.3 PS/2 default tick rate */
 #endif
-#ifdef __bsdi
-#include <time.h>
-#endif
+
+/* Number of ticks to benchmark each primitive type.
+ * At HZ=100, BENCH_TICKS=20 means 200ms per test. */
+#define BENCH_TICKS 20
 
 
 #define GAP 10
@@ -56,8 +60,7 @@ GLenum lighting = GL_FALSE;
 GLenum shading = GL_FALSE;
 GLenum texturing = GL_FALSE;
 
-GLint repeatCount = 1000;
-GLint loopCount = 100;
+GLint loopCount = 100;  /* primitives per inner batch */
 
 GLubyte texture[4*3] = {
     0xFF, 0, 0, 0, 0, 0,
@@ -116,158 +119,171 @@ static void Viewport(GLint row, GLint column)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(-boxW/2, boxW/2, -boxH/2, boxH/2);
+    gluOrtho2D((GLdouble)(-boxW/2), (GLdouble)(boxW/2),
+               (GLdouble)(-boxH/2), (GLdouble)(boxH/2));
     glMatrixMode(GL_MODELVIEW);
 
    /* glEnable(GL_SCISSOR_TEST);*/
     glScissor(x, y, boxW, boxH);
 }
 
-static double Now(void)
+/* Return current elapsed ticks from times() */
+static clock_t cur_ticks(void)
 {
-#ifdef __unix
     struct tms tm;
-#ifdef __MACHTEN__
-
-    times(&tm);
-
-    return (double)tm.tms_utime / (double)CLK_TCK;
-#else
-    clock_t clk;
-
-    clk = times(&tm);
-
-#ifdef CLK_TCK
-    return (double)clk / (double)CLK_TCK;
-#else
-    return (double)clk / (double)HZ;
-#endif
-#endif
-    return 0;
-#endif
+    return times(&tm);
 }
 
-static void Report(const char *msg, float elapsed)
+/* Spin until a tick boundary, return the new tick count.
+ * This ensures our benchmark starts right at a clean tick edge. */
+static clock_t wait_for_tick(void)
 {
+    clock_t t0 = cur_ticks();
+    clock_t t;
+    while ((t = cur_ticks()) == t0)
+	;
+    return t;
+}
 
-    if (elapsed == 0.0) {
-	printf("%s per second: Unknown, elapsed time is zero\n", msg);
+static void Report(const char *msg, long count, clock_t ticks)
+{
+    double elapsed = (double)ticks / (double)HZ;
+    if (ticks <= 0) {
+	printf("%s: %ld drawn (ticks=0, HZ may be wrong)\n", msg, count);
     } else {
-	printf("%s per second: %g\n", msg, repeatCount*loopCount/elapsed);
+	printf("%s: %ld drawn in %ld ticks (%.2fs) = %.0f/sec\n",
+	       msg, count, (long)ticks, elapsed,
+	       (double)count / elapsed);
     }
+}
+
+static void Warmup(void)
+{
+    float v1[3], v2[3], v3[3];
+    int j;
+
+    v1[0] = 10; v1[1] = 10; v1[2] = 10;
+    v2[0] = 20; v2[1] = 20; v2[2] = 10;
+    v3[0] = 10; v3[1] = 20; v3[2] = 10;
+
+    glBegin(GL_POINTS);
+    for (j = 0; j < loopCount; j++) glVertex2fv(v1);
+    glEnd();
+
+    glBegin(GL_LINES);
+    for (j = 0; j < loopCount; j++) { glVertex2fv(v1); glVertex2fv(v2); }
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    for (j = 0; j < loopCount; j++) {
+        glVertex2fv(v1); glVertex2fv(v2); glVertex2fv(v3);
+    }
+    glEnd();
+
+    glFinish();
 }
 
 static void Points(void)
 {
-    GLint i, j;
     float v1[3];
-    double start;
+    long count = 0;
+    clock_t start, now;
+    int j;
 
-    start = Now();
-    for (i = 0; i < repeatCount; i++) {
-	v1[0] = 10;
-	v1[1] = 10;
-	v1[2] = 10;
+    v1[0] = 10; v1[1] = 10; v1[2] = 10;
+
+    start = wait_for_tick();
+    do {
 	glBegin(GL_POINTS);
-	    for (j = 0; j < loopCount; j++) {
-		glVertex2fv(v1);
-	    }
+	for (j = 0; j < loopCount; j++) {
+	    glVertex2fv(v1);
+	}
 	glEnd();
-    }
+	count += loopCount;
+	now = cur_ticks();
+    } while (now - start < BENCH_TICKS);
     glFinish();
-    Report("Points", Now()-start);
+    Report("Points", count, now - start);
 }
 
 static void Lines(void)
 {
-    GLint i, j;
     float v1[3], v2[3];
-    double start;
+    long count = 0;
+    clock_t start, now;
+    int j;
 
-    start = Now();
-    for (i = 0; i < repeatCount; i++) {
-	v1[0] = 10;
-	v1[1] = 10;
-	v1[2] = 10;
-	v2[0] = 20;
-	v2[1] = 20;
-	v2[2] = 10;
+    v1[0] = 10; v1[1] = 10; v1[2] = 10;
+    v2[0] = 20; v2[1] = 20; v2[2] = 10;
+
+    start = wait_for_tick();
+    do {
 	glBegin(GL_LINES);
-	    for (j = 0; j < loopCount; j++) {
-		glVertex2fv(v1);
-		glVertex2fv(v2);
-	    }
+	for (j = 0; j < loopCount; j++) {
+	    glVertex2fv(v1);
+	    glVertex2fv(v2);
+	}
 	glEnd();
-    }
+	count += loopCount;
+	now = cur_ticks();
+    } while (now - start < BENCH_TICKS);
     glFinish();
-    Report("Lines", Now()-start);
+    Report("Lines", count, now - start);
 }
 
 static void Triangles(void)
 {
-    GLint i, j;
     float v1[3], v2[3], v3[3], t1[2], t2[2], t3[2];
-    double start;
+    long count = 0;
+    clock_t start, now;
+    int j;
 
-    start = Now();
+    v1[0] = 10; v1[1] = 10; v1[2] = 10;
+    v2[0] = 20; v2[1] = 20; v2[2] = 10;
+    v3[0] = 10; v3[1] = 20; v3[2] = 10;
+    t1[0] = 0;  t1[1] = 0;
+    t2[0] = 1;  t2[1] = 1;
+    t3[0] = 0;  t3[1] = 1;
 
-    v1[0] = 10;
-    v1[1] = 10;
-    v1[2] = 10;
-    v2[0] = 20;
-    v2[1] = 20;
-    v2[2] = 10;
-    v3[0] = 10;
-    v3[1] = 20;
-    v3[2] = 10;
-
-    t1[0] = 0;
-    t1[1] = 0;
-    t2[0] = 1;
-    t2[1] = 1;
-    t3[0] = 0;
-    t3[1] = 1;
-
-    for (i = 0; i < repeatCount; i++) {
+    start = wait_for_tick();
+    do {
 	glBegin(GL_TRIANGLES);
-	    for (j = 0; j < loopCount; j++) {
-		if (texturing) {
-		    glTexCoord2fv(t1);
-		}
-		glVertex2fv(v1);
-		if (texturing) {
-		    glTexCoord2fv(t2);
-		}
-		glVertex2fv(v2);
-		if (texturing) {
-		    glTexCoord2fv(t3);
-		}
-		glVertex2fv(v3);
-	    }
+	for (j = 0; j < loopCount; j++) {
+	    if (texturing) { glTexCoord2fv(t1); }
+	    glVertex2fv(v1);
+	    if (texturing) { glTexCoord2fv(t2); }
+	    glVertex2fv(v2);
+	    if (texturing) { glTexCoord2fv(t3); }
+	    glVertex2fv(v3);
+	}
 	glEnd();
-    }
+	count += loopCount;
+	now = cur_ticks();
+    } while (now - start < BENCH_TICKS);
     glFinish();
-    Report("Triangles", Now()-start);
+    Report("Triangles", count, now - start);
 }
 
 static void Rects(void)
 {
-    GLint i, j;
     float v1[2], v2[2];
-    double start;
+    long count = 0;
+    clock_t start, now;
+    int j;
 
-    start = Now();
-    for (i = 0; i < repeatCount; i++) {
-	v1[0] = 10;
-	v1[1] = 10;
-	v2[0] = 20;
-	v2[1] = 20;
+    v1[0] = 10; v1[1] = 10;
+    v2[0] = 20; v2[1] = 20;
+
+    start = wait_for_tick();
+    do {
 	for (j = 0; j < loopCount; j++) {
 	    glRectfv(v1, v2);
 	}
-    }
+	count += loopCount;
+	now = cur_ticks();
+    } while (now - start < BENCH_TICKS);
     glFinish();
-    Report("Rects", Now()-start);
+    Report("Rects", count, now - start);
 }
 
 static void Draw(void)
@@ -354,6 +370,7 @@ static void Draw(void)
        printf("texturing: off\n");
      }
 
+    Warmup();
     Viewport(0, 0); Points();
     Viewport(0, 1); Lines();
     Viewport(0, 2); Triangles();
@@ -387,6 +404,17 @@ static GLenum Args(int argc, char **argv)
 	    directRender = GL_TRUE;
 	} else if (strcmp(argv[i], "-ir") == 0) {
 	    directRender = GL_FALSE;
+	} else if (strcmp(argv[i], "-h") == 0) {
+	    printf("Usage: speed [options]\n");
+	    printf("  -rgb   RGB color mode (default)\n");
+	    printf("  -ci    Color index mode\n");
+	    printf("  -sb    Single buffer (default)\n");
+	    printf("  -db    Double buffer\n");
+	    printf("  -dr    Direct render (default)\n");
+	    printf("  -ir    Indirect render\n");
+	    printf("  -h     Print this help\n");
+	    printf("Keys: a=antialiasing  d=depth  f=fog  F=nicefog  s=shading  t=texturing\n");
+	    return GL_FALSE;
 	} else {
 	    printf("%s (Bad option).\n", argv[i]);
 	    return GL_FALSE;
@@ -406,7 +434,7 @@ void main(int argc, char **argv)
     windH = 300;
     tkInitPosition(0, 0, windW, windH);
 
-    windType = TK_ALPHA | TK_DEPTH;
+    windType = TK_DEPTH;
     windType |= (rgb) ? TK_RGB : TK_INDEX;
     windType |= (doubleBuffer) ? TK_DOUBLE : TK_SINGLE;
     windType |= (directRender) ? TK_DIRECT : TK_INDIRECT;

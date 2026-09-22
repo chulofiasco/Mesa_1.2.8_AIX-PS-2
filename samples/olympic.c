@@ -193,7 +193,6 @@ void ReInit(void)
 
 void Init(void)
 {
-    int gid;
     float base, height;
     float aspect, x, y;
     int i;

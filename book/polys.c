@@ -85,7 +85,8 @@ void display(void)
     glRectf (225.0, 25.0, 325.0, 125.0);
     glDisable (GL_POLYGON_STIPPLE);
 
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 }
 
 void myinit (void) 
@@ -101,7 +102,7 @@ void myinit (void)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 350, 150);
     auxInitWindow (argv[0]);
     myinit ();

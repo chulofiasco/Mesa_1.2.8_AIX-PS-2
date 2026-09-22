@@ -275,17 +275,8 @@ void auxDeleteMouseFunc( int mouse, int mode, void (*Func)(AUX_EVENTREC *))
 }
 
 
-static void idle(void)
-{
-   /* do nothing */
-}
-
 void auxMainLoop(void (*Func)(void))
 {
-   if (animate) {
-      auxIdleFunc( idle );
-   }
-
     tkDisplayFunc(Func);
     tkExec();
 }
@@ -341,7 +332,7 @@ GLenum auxInitWindow(char *title)
     tkKeyDownFunc(KeyDown);
     auxKeyFunc(AUX_ESCAPE, auxQuit);
     glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClearIndex(0);
+    glClearIndex(0.0);
     glLoadIdentity();
     if (useDoubleAsSingle) {
         glReadBuffer(GL_FRONT);

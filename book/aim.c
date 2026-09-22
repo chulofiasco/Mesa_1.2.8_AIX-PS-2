@@ -64,7 +64,8 @@ void display (void)
     glTranslatef (0.0, 0.0, -5.0);
     auxWireCube(2.0);
     auxWireSphere(1.0);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 #define PI  3.1415926535
@@ -106,7 +107,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit ();

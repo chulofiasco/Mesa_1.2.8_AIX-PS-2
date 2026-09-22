@@ -1,0 +1,23 @@
+# Standalone AIX PS/2 Makefile for Mesa 1.2.8 libMesaGLU.a
+
+CC = cc
+CFLAGS = -Hon=ansi -O -DFBIND=1
+INCDIR = ../include
+LIBDIR = ../lib
+GLU_LIB = libMesaGLU.a
+
+SOURCES = glu.c mipmap.c nurbs.c nurbscrv.c nurbssrf.c nurbsutl.c project.c quadric.c tess.c tesselat.c polytest.c
+OBJECTS = $(SOURCES:.c=.o)
+
+all aix-ps2 targets: $(LIBDIR)/$(GLU_LIB)
+
+.c.o:
+	$(CC) -c -I$(INCDIR) $(CFLAGS) $<
+
+$(LIBDIR)/$(GLU_LIB): $(OBJECTS)
+	-mkdir $(LIBDIR) 2>/dev/null || true
+	ar ruv $(GLU_LIB) $(OBJECTS)
+	mv $(GLU_LIB) $(LIBDIR)/
+
+clean:
+	rm -f *.o $(LIBDIR)/$(GLU_LIB)

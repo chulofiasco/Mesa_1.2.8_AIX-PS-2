@@ -84,6 +84,8 @@ libMesaGLw.a: $(OBJS)
 	-$(RANLIB) $@
 
 install: all
+	@if [ -f $(libdir) ] && [ ! -d $(libdir) ]; then rm -f $(libdir); fi
+	$(top_srcdir)/install-sh -d $(libdir)
 	$(INSTALL_DATA) libMesaGLw.a $(libdir)
 
 uninstall:
@@ -92,7 +94,7 @@ uninstall:
 GLwDrawingArea.o: \
   $(srcincdir)/GLwDrawA.h $(srcincdir)/GLwDrawAP.h 
 
-GLwMDrawingArea.o GLwCreateMDrawingArea.c: \
+GLwMDrawingArea.o GLwCreateMDrawingArea.o: \
   $(srcincdir)/GLwDrawA.h $(srcincdir)/GLwDrawAP.h \
   $(srcincdir)/GLwMDrawA.h $(srcincdir)/GLwMDrawAP.h
 

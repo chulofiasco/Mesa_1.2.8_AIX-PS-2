@@ -91,12 +91,20 @@ $Log: nurbs.c,v $
 void
 call_user_error( GLUnurbsObj *nobj, GLenum error )
 {
-	nobj->error=error;
+	/* MetaWare High C 2.2g / AIX PS/2: GLenum is unsigned int (16-bit).
+	 * GLU error constants > 65535 are truncated at the call site.
+	 * Use unsigned long (32-bit) to reconstruct the full value for display,
+	 * since assigning back to a GLenum local would truncate again. */
+	unsigned long err32 = (unsigned long)error;
+	if (err32 > 0UL && err32 < 65536UL) {
+		err32 |= 0x10000UL;
+	}
+	nobj->error = error;
 	if(nobj->error_callback != NULL) {
 		(*(nobj->error_callback))(error);
 	}
 	else {
-	   printf("NURBS error %d %s\n", error, gluErrorString(error) );
+	   printf("NURBS error %lu\n", err32);
 	}
 }
 
@@ -137,6 +145,14 @@ GLUnurbsObj *gluNewNurbsRenderer( void )
 	  for(i=0;i<4;i++)
 		  n->sampling_matrices.viewport[i]=tmp_viewport[i];
 	  n->trim=NULL;
+	  
+	  /* Explicitly initialize internal attribute types to invalid to prevent garbage memory reads */
+	  n->surface.color.type = GLU_INVALID_ENUM;
+	  n->surface.normal.type = GLU_INVALID_ENUM;
+	  n->surface.texture.type = GLU_INVALID_ENUM;
+	  n->curve.color.type = GLU_INVALID_ENUM;
+	  n->curve.normal.type = GLU_INVALID_ENUM;
+	  n->curve.texture.type = GLU_INVALID_ENUM;
    }
    return n;
 }
@@ -173,18 +189,20 @@ void gluNurbsProperty( GLUnurbsObj *nobj, GLenum property, GLfloat value )
 {
    GLenum val;
 
-   switch (property) {
-      case GLU_SAMPLING_TOLERANCE:
-      	 if(value <= 0.0)
-      	 {
-      	 	call_user_error(nobj,GLU_INVALID_VALUE);
-      	 	return;
+   if (property < 65536 && property > 0) property |= 0x10000;
+
+   if ((property & 0xffff) == (GLU_SAMPLING_TOLERANCE & 0xffff)) {
+       	 if(value <= 0.0)
+       	 {
+       	 	call_user_error(nobj,GLU_INVALID_VALUE);
+       	 	return;
 		 }
          nobj->sampling_tolerance=value;
-         break;
-      case GLU_DISPLAY_MODE:
-         val=(GLenum)value;
-         if(val!=GLU_FILL && val!=GLU_OUTLINE_POLYGON && val!=GLU_OUTLINE_PATCH)
+   }
+   else if ((property & 0xffff) == (GLU_DISPLAY_MODE & 0xffff)) {
+         val = (unsigned long)value;
+         if (val < 65536 && val > 0) val |= 0x10000;
+         if((val & 0xffff)!=(GLU_FILL & 0xffff) && (val & 0xffff)!=(GLU_OUTLINE_POLYGON & 0xffff) && (val & 0xffff)!=(GLU_OUTLINE_PATCH & 0xffff))
          {
          	call_user_error(nobj,GLU_INVALID_ENUM);
          	return;
@@ -195,50 +213,50 @@ void gluNurbsProperty( GLUnurbsObj *nobj, GLenum property, GLfloat value )
          	return;
 		 }
          nobj->display_mode=val;
-if(val==GLU_OUTLINE_PATCH)
+if((val & 0xffff)==(GLU_OUTLINE_PATCH & 0xffff))
 	fprintf(stderr,"NURBS, for the moment, can display only in POLYGON mode\n");
-         break;
-      case GLU_CULLING:
-         val=(GLenum)value;
+   }
+   else if ((property & 0xffff) == (GLU_CULLING & 0xffff)) {
+         val = (unsigned long)value;
          if(val!=GL_TRUE && val!=GL_FALSE)
          {
          	call_user_error(nobj,GLU_INVALID_ENUM);
          	return;
 		 }
          nobj->culling = (GLboolean) value;
-         break;
-      case GLU_AUTO_LOAD_MATRIX:
-         val=(GLenum)value;
+   }
+   else if ((property & 0xffff) == (GLU_AUTO_LOAD_MATRIX & 0xffff)) {
+         val = (unsigned long)value;
          if(val!=GL_TRUE && val!=GL_FALSE)
          {
          	call_user_error(nobj,GLU_INVALID_ENUM);
          	return;
 		 }
          nobj->auto_load_matrix = (GLboolean) value;
-         break;
-      default:
-         call_user_error(nobj,GLU_NURBS_ERROR26);
+   }
+   else {
+         call_user_error(nobj,GLU_INVALID_ENUM);
    }
 }
 
 
 void gluGetNurbsProperty( GLUnurbsObj *nobj, GLenum property, GLfloat *value )
 {
-   switch (property) {
-      case GLU_SAMPLING_TOLERANCE:
-         *value = nobj->sampling_tolerance;
-         break;
-      case GLU_DISPLAY_MODE:
-         *value = (GLfloat) nobj->display_mode;
-         break;
-      case GLU_CULLING:
-	 *value = nobj->culling ? 1.0 : 0.0;
-         break;
-      case GLU_AUTO_LOAD_MATRIX:
-         *value = nobj->auto_load_matrix ? 1.0 : 0.0;
-	 break;
-      default:
-         call_user_error(nobj,GLU_INVALID_ENUM);
+   if (property < 65536 && property > 0) property |= 0x10000;
+   if ((property & 0xffff) == (GLU_SAMPLING_TOLERANCE & 0xffff)) {
+      *value = nobj->sampling_tolerance;
+   }
+   else if ((property & 0xffff) == (GLU_DISPLAY_MODE & 0xffff)) {
+      *value = (GLfloat) nobj->display_mode;
+   }
+   else if ((property & 0xffff) == (GLU_CULLING & 0xffff)) {
+      *value = nobj->culling ? 1.0 : 0.0;
+   }
+   else if ((property & 0xffff) == (GLU_AUTO_LOAD_MATRIX & 0xffff)) {
+      *value = nobj->auto_load_matrix ? 1.0 : 0.0;
+   }
+   else {
+      call_user_error(nobj,GLU_INVALID_ENUM);
    }
 }
 
@@ -266,7 +284,7 @@ void gluEndCurve( GLUnurbsObj * nobj )
 		call_user_error(nobj,GLU_NURBS_ERROR7);
 		return;
 	}
-	if(nobj->curve.geom.type==GLU_INVALID_ENUM)
+	if((nobj->curve.geom.type & 0xffff) == (GLU_INVALID_ENUM & 0xffff))
 	{
 		call_user_error(nobj,GLU_NURBS_ERROR8);
 		nobj->nurbs_type=GLU_NURBS_NONE;
@@ -300,46 +318,11 @@ void gluEndCurve( GLUnurbsObj * nobj )
 void gluNurbsCurve( GLUnurbsObj *nobj, GLint nknots, GLfloat *knot,
 		    GLint stride, GLfloat *ctlarray, GLint order, GLenum type )
 {
+
 	if(nobj->nurbs_type==GLU_NURBS_TRIM)
 	{
-		nurbs_trim *ptr1;
-		trim_list *ptr2;
-
-return;
-		if(type!=GLU_MAP1_TRIM_2 && type!=GLU_MAP1_TRIM_3)
-		{
-			call_user_error(nobj,GLU_NURBS_ERROR14);
-			return;
-		}
-		for(ptr1=nobj->trim;ptr1->next;ptr1=ptr1->next);
-		if(ptr1->trim_loop)
-		{
-			for(ptr2=ptr1->trim_loop;ptr2->next;ptr2=ptr2->next);
-			if((ptr2->next=(trim_list *)malloc(sizeof(trim_list)))==NULL)
-			{
-				call_user_error(nobj,GLU_OUT_OF_MEMORY);
-				return;
-			}
-			ptr2=ptr2->next;
-		}
-		else
-		{
-			if((ptr2=(trim_list *)malloc(sizeof(trim_list)))==NULL)
-			{
-				call_user_error(nobj,GLU_OUT_OF_MEMORY);
-				return;
-			}
-			ptr1->trim_loop=ptr2;
-		}
-		ptr2->trim_type=GLU_TRIM_NURBS;
-		ptr2->curve.nurbs_curve.knot_count=nknots;
-		ptr2->curve.nurbs_curve.knot=knot;
-		ptr2->curve.nurbs_curve.stride=stride;
-		ptr2->curve.nurbs_curve.ctrlarray=ctlarray;
-		ptr2->curve.nurbs_curve.order=order;
-		ptr2->curve.nurbs_curve.dim= (type==GLU_MAP1_TRIM_2 ? 2 : 3 );
-		ptr2->curve.nurbs_curve.type=type;
-		ptr2->next=NULL;
+		/* Trimming is not yet supported in Mesa 1.2.8 GLU */
+		return;
 	}
 	else
 	{
@@ -357,7 +340,7 @@ return;
 		{
 			case GL_MAP1_VERTEX_3:
 			case GL_MAP1_VERTEX_4:
-				if(nobj->curve.geom.type!=GLU_INVALID_ENUM)
+				if((nobj->curve.geom.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 				{
 					call_user_error(nobj,GLU_NURBS_ERROR8);
 					return;
@@ -565,16 +548,17 @@ void gluNurbsSurface( GLUnurbsObj *nobj,
 void
 gluNurbsCallback( GLUnurbsObj *nobj, GLenum which, void (*fn)(GLenum))
 {
+	/* GLU_ERROR = 100103UL exceeds 16-bit GLenum range on AIX PS/2.
+	 * Use the lower-16-bit mask comparison (same pattern as tess.c)
+	 * so the check is self-consistent with the truncated `which` value. */
 	nobj->error_callback=fn;
-	if(which!=GLU_ERROR)
+	if((which & 0xffff) != (GLU_ERROR & 0xffff))
 		call_user_error(nobj,GLU_INVALID_ENUM);
 }
 
 void
 gluBeginTrim( GLUnurbsObj *nobj )
 {
-	nurbs_trim *ptr;
-
 	if(nobj->nurbs_type!=GLU_NURBS_TRIM_DONE)
 		if(nobj->nurbs_type!=GLU_NURBS_NO_TRIM)
 		{
@@ -606,8 +590,6 @@ void
 gluPwlCurve( GLUnurbsObj *nobj, GLint count, GLfloat *array, GLint stride,
 	GLenum type)
 {
-	nurbs_trim *ptr1;
-	trim_list *ptr2;
 
 	if(nobj->nurbs_type==GLU_NURBS_CURVE)
 	{

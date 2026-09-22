@@ -1537,7 +1537,7 @@ void gl_index_shade_vertices( GLuint n,
                         }
                         else {
                            int k = (int) (dot * (GLfloat)(SHINE_TABLE_SIZE-1));
-                           GLfloat spec_coef = CC.Light.Material[side].ShineTable[k];
+                           spec_coef = CC.Light.Material[side].ShineTable[k];
                         }
                      }
                      s_ci = 0.30F * CC.Light.Light[i].Specular[0]

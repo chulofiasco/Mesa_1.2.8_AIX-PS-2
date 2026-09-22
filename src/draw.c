@@ -581,7 +581,6 @@ static void render_clipped_polygon( GLuint n, GLuint vlist[], GLuint odd_flag )
 static void render_polygon( GLuint n, GLuint vlist[], GLuint odd_flag )
 {
    GLuint provoking_vertex;
-   GLuint facing;
 
    /* which vertex dictates the color when flat shading: */
    provoking_vertex = (CC.Mode==GL_POLYGON) ? vlist[0] : vlist[n-1];
@@ -1828,6 +1827,16 @@ void gl_end( void )
    }
    PB.primitive = CC.Mode = GL_BITMAP;  /* Default mode */
    VB.MaterialChanges = GL_FALSE;
+
+   /* Reset vertex function so the next gl_begin() always calls
+    * setup_vertex_pointer().  This ensures each begin/end pair
+    * (including multiple pairs inside a replayed display list) gets
+    * the correct vertex dispatch function for the current GL state.
+    * Only do this in execute mode; during compile-and-execute the
+    * VertexFunc must stay as gl_save_and_execute_vertex. */
+   if (!CC.CompileFlag) {
+      CC.VertexFunc = gl_nop_vertex;
+   }
 
    if (DD.end) {
       (*DD.end)();

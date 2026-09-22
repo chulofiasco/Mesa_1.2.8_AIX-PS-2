@@ -1020,6 +1020,8 @@ void gl_scale( GLfloat x, GLfloat y, GLfloat z )
       case GL_TEXTURE:
          m = CC.TextureMatrix;
 	 break;
+      default:
+         return;
    }
    m[0] *= x;   m[4] *= y;   m[8]  *= z;
    m[1] *= x;   m[5] *= y;   m[9]  *= z;
@@ -1078,6 +1080,8 @@ void gl_translate( GLfloat x, GLfloat y, GLfloat z )
       case GL_TEXTURE:
          m = CC.TextureMatrix;
 	 break;
+      default:
+         return;
    }
 
    m[12] = m[0] * x + m[4] * y + m[8]  * z + m[12];

@@ -828,11 +828,9 @@ void draw_polygon_ANY_pixmap( GLuint n, GLuint vlist[], GLuint pv )
 
 
 static GLint lx[MAX_HEIGHT], rx[MAX_HEIGHT];	/* X bounds */
-static GLfixed lz[MAX_HEIGHT], rz[MAX_HEIGHT];	/* Z values */
 static GLfixed lr[MAX_HEIGHT], rr[MAX_HEIGHT];	/* Red */
 static GLfixed lg[MAX_HEIGHT], rg[MAX_HEIGHT];	/* Green */
 static GLfixed lb[MAX_HEIGHT], rb[MAX_HEIGHT];	/* Blue */
-static GLfixed la[MAX_HEIGHT], ra[MAX_HEIGHT];	/* Alpha */
 
 
 

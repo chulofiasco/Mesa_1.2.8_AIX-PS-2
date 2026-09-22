@@ -80,7 +80,8 @@ void display(void)
     glRotatef(85.0, 1.0, 1.0, 1.0);
     glEvalMesh2(GL_FILL, 0, 20, 0, 20);
     glPopMatrix();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myinit(void)
@@ -113,7 +114,7 @@ void myReshape(int w, int h)
 
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();

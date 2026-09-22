@@ -41,8 +41,22 @@ VISUAL_GL_DEMOS = demo.gl.pseudo.rgb demo.gl.true.rgb \
 VISUAL_MESA_DEMOS = demo.mesa.pseudo.rgb demo.mesa.true.rgb \
 		    demo.mesa.pseudo.ci demo.mesa.true.ci
 
-all install uninstall:
+all:
 	for d in $(SUBDIRS); do	(cd $$d && $(MAKE) $@); done
+
+install:
+	for d in $(SUBDIRS); do	(cd $$d && $(MAKE) $@); done
+
+uninstall:
+	for d in $(SUBDIRS); do	(cd $$d && $(MAKE) $@); done
+
+install-demos:
+	@if [ ! -d /usr/local ]; then mkdir /usr/local; fi
+	@if [ ! -d /usr/local/Mesa-1.2.8 ]; then mkdir /usr/local/Mesa-1.2.8; fi
+	@if [ ! -d /usr/local/Mesa-1.2.8/widgets ]; then mkdir /usr/local/Mesa-1.2.8/widgets; fi
+	@for f in cube mcube ed tea Cube Mcube Ed Tea events; do \
+		if [ -f demos/$$f ]; then cp demos/$$f /usr/local/Mesa-1.2.8/widgets/; fi; \
+	done
 
 demo demo.gl demo.mesa demo.ws demo.ws1 demo.tea \
   demo.gl.pseudo demo.gl.true \

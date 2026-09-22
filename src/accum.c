@@ -110,8 +110,9 @@ void glClearAccum( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha )
 
 void gl_accum( GLenum op, GLfloat value )
 {
-   GLuint xpos, ypos, width, height;
-   GLfloat acc_scale;
+   volatile GLuint xpos, ypos, width, height;
+   volatile GLfloat acc_scale;
+   volatile GLfloat v_value = value;
 
    if (sizeof(GLaccum)==1) {
       acc_scale = 127.0;
@@ -160,11 +161,13 @@ void gl_accum( GLenum op, GLfloat value )
          {
 	    GLaccum ival, *acc;
 	    GLuint i, j;
+            GLfloat loc_val = v_value, loc_scale = acc_scale;
 
-	    ival = (GLaccum) (value * acc_scale);
+	    ival = (GLaccum) (loc_val * loc_scale);
 	    for (j=0;j<height;j++) {
-	       acc = CC.AccumBuffer + ( ypos * CC.BufferWidth + xpos ) * 4;
-	       for (i=0;i<width;i++) {
+               GLuint loc_x = xpos, loc_y = ypos, loc_w = width;
+	       acc = CC.AccumBuffer + ( loc_y * CC.BufferWidth + loc_x ) * 4;
+	       for (i=0;i<loc_w;i++) {
 		  *acc += ival;	  acc++;   /* red */
 		  *acc += ival;	  acc++;   /* green */
 		  *acc += ival;	  acc++;   /* blue */
@@ -180,12 +183,14 @@ void gl_accum( GLenum op, GLfloat value )
 	    GLuint i, j;
 
 	    for (j=0;j<height;j++) {
-	       acc = CC.AccumBuffer + ( ypos * CC.BufferWidth + xpos ) * 4;
-	       for (i=0;i<width;i++) {
-		  *acc = (GLaccum) ( (GLfloat) *acc * value );	  acc++; /*r*/
-		  *acc = (GLaccum) ( (GLfloat) *acc * value );	  acc++; /*g*/
-		  *acc = (GLaccum) ( (GLfloat) *acc * value );	  acc++; /*g*/
-		  *acc = (GLaccum) ( (GLfloat) *acc * value );	  acc++; /*a*/
+               GLuint loc_x = xpos, loc_y = ypos, loc_w = width;
+               GLfloat loc_val = v_value;
+	       acc = CC.AccumBuffer + ( loc_y * CC.BufferWidth + loc_x ) * 4;
+	       for (i=0;i<loc_w;i++) {
+		  *acc = (GLaccum) ( (GLfloat) *acc * loc_val );	  acc++; /*r*/
+		  *acc = (GLaccum) ( (GLfloat) *acc * loc_val );	  acc++; /*g*/
+		  *acc = (GLaccum) ( (GLfloat) *acc * loc_val );	  acc++; /*b*/
+		  *acc = (GLaccum) ( (GLfloat) *acc * loc_val );	  acc++; /*a*/
 	       }
 	       ypos++;
 	    }
@@ -196,25 +201,31 @@ void gl_accum( GLenum op, GLfloat value )
 	    GLaccum *acc;
 	    GLubyte red[MAX_WIDTH], green[MAX_WIDTH];
 	    GLubyte blue[MAX_WIDTH], alpha[MAX_WIDTH];
-	    GLfloat rscale, gscale, bscale, ascale;
-	    GLuint i, j;
+	    volatile GLfloat rscale, gscale, bscale, ascale;
+	    GLuint i;
+            volatile GLuint j;
 
 	    (void) (*DD.set_buffer)( CC.Pixel.ReadBuffer );
 
 	    /* Accumulate */
-	    rscale = value * acc_scale / CC.RedScale;
-	    gscale = value * acc_scale / CC.GreenScale;
-	    bscale = value * acc_scale / CC.BlueScale;
-	    ascale = value * acc_scale / CC.AlphaScale;
+            {
+               GLfloat loc_val = v_value, loc_scale = acc_scale;
+	       rscale = loc_val * loc_scale / CC.RedScale;
+	       gscale = loc_val * loc_scale / CC.GreenScale;
+	       bscale = loc_val * loc_scale / CC.BlueScale;
+	       ascale = loc_val * loc_scale / CC.AlphaScale;
+            }
 	    for (j=0;j<height;j++) {
-	       (*DD.read_color_span)( width, xpos, ypos,
+               GLuint loc_x = xpos, loc_y = ypos, loc_w = width;
+               GLfloat loc_rs = rscale, loc_gs = gscale, loc_bs = bscale, loc_as = ascale;
+	       (*DD.read_color_span)( loc_w, loc_x, loc_y,
                                       red, green, blue, alpha);
-	       acc = CC.AccumBuffer + ( ypos * CC.BufferWidth + xpos ) * 4;
-	       for (i=0;i<width;i++) {
-		  *acc += (GLaccum) ( (GLfloat) red[i]   * rscale );  acc++;
-		  *acc += (GLaccum) ( (GLfloat) green[i] * gscale );  acc++;
-		  *acc += (GLaccum) ( (GLfloat) blue[i]  * bscale );  acc++;
-		  *acc += (GLaccum) ( (GLfloat) alpha[i] * ascale );  acc++;
+	       acc = CC.AccumBuffer + ( loc_y * CC.BufferWidth + loc_x ) * 4;
+	       for (i=0;i<loc_w;i++) {
+		  *acc += (GLaccum) ( (GLfloat) red[i]   * loc_rs );  acc++;
+		  *acc += (GLaccum) ( (GLfloat) green[i] * loc_gs );  acc++;
+		  *acc += (GLaccum) ( (GLfloat) blue[i]  * loc_bs );  acc++;
+		  *acc += (GLaccum) ( (GLfloat) alpha[i] * loc_as );  acc++;
 	       }
 	       ypos++;
 	    }
@@ -227,25 +238,31 @@ void gl_accum( GLenum op, GLfloat value )
 	    GLaccum *acc;
 	    GLubyte red[MAX_WIDTH], green[MAX_WIDTH];
 	    GLubyte blue[MAX_WIDTH], alpha[MAX_WIDTH];
-	    GLfloat rscale, gscale, bscale, ascale;
-	    GLuint i, j;
+	    volatile GLfloat rscale, gscale, bscale, ascale;
+	    GLuint i;
+            volatile GLuint j;
 
 	    (void) (*DD.set_buffer)( CC.Pixel.ReadBuffer );
 
 	    /* Load accumulation buffer */
-	    rscale = value * acc_scale / CC.RedScale;
-	    gscale = value * acc_scale / CC.GreenScale;
-	    bscale = value * acc_scale / CC.BlueScale;
-	    ascale = value * acc_scale / CC.AlphaScale;
+            {
+               GLfloat loc_val = v_value, loc_scale = acc_scale;
+	       rscale = loc_val * loc_scale / CC.RedScale;
+	       gscale = loc_val * loc_scale / CC.GreenScale;
+	       bscale = loc_val * loc_scale / CC.BlueScale;
+	       ascale = loc_val * loc_scale / CC.AlphaScale;
+            }
 	    for (j=0;j<height;j++) {
-	       (*DD.read_color_span)( width, xpos, ypos,
+               GLuint loc_x = xpos, loc_y = ypos, loc_w = width;
+               GLfloat loc_rs = rscale, loc_gs = gscale, loc_bs = bscale, loc_as = ascale;
+	       (*DD.read_color_span)( loc_w, loc_x, loc_y,
                                       red, green, blue, alpha);
-	       acc = CC.AccumBuffer + ( ypos * CC.BufferWidth + xpos ) * 4;
-	       for (i=0;i<width;i++) {
-		  *acc++ = (GLaccum) ( (GLfloat) red[i]   * rscale );
-		  *acc++ = (GLaccum) ( (GLfloat) green[i] * gscale );
-		  *acc++ = (GLaccum) ( (GLfloat) blue[i]  * bscale );
-		  *acc++ = (GLaccum) ( (GLfloat) alpha[i] * ascale );
+	       acc = CC.AccumBuffer + ( loc_y * CC.BufferWidth + loc_x ) * 4;
+	       for (i=0;i<loc_w;i++) {
+		  *acc++ = (GLaccum) ( (GLfloat) red[i]   * loc_rs );
+		  *acc++ = (GLaccum) ( (GLfloat) green[i] * loc_gs );
+		  *acc++ = (GLaccum) ( (GLfloat) blue[i]  * loc_bs );
+		  *acc++ = (GLaccum) ( (GLfloat) alpha[i] * loc_as );
 	       }
 	       ypos++;
 	    }
@@ -258,32 +275,38 @@ void gl_accum( GLenum op, GLfloat value )
 	    GLubyte red[MAX_WIDTH], green[MAX_WIDTH];
 	    GLubyte blue[MAX_WIDTH], alpha[MAX_WIDTH];
 	    GLaccum *acc;
-	    GLfloat rscale, gscale, bscale, ascale;
+	    volatile GLfloat rscale, gscale, bscale, ascale;
 	    GLint rmax, gmax, bmax, amax;
-	    GLuint i, j;
+	    GLuint i;
+            volatile GLuint j;
 
-	    rscale = value / acc_scale * CC.RedScale;
-	    gscale = value / acc_scale * CC.GreenScale;
-	    bscale = value / acc_scale * CC.BlueScale;
-	    ascale = value / acc_scale * CC.AlphaScale;
+            {
+               GLfloat loc_val = v_value, loc_scale = acc_scale;
+	       rscale = loc_val / loc_scale * CC.RedScale;
+	       gscale = loc_val / loc_scale * CC.GreenScale;
+	       bscale = loc_val / loc_scale * CC.BlueScale;
+	       ascale = loc_val / loc_scale * CC.AlphaScale;
+            }
 	    rmax = (GLint) CC.RedScale;
 	    gmax = (GLint) CC.GreenScale;
 	    bmax = (GLint) CC.BlueScale;
 	    amax = (GLint) CC.AlphaScale;
 	    for (j=0;j<height;j++) {
-	       acc = CC.AccumBuffer + ( ypos * CC.BufferWidth + xpos ) * 4;
-	       for (i=0;i<width;i++) {
+               GLuint loc_x = xpos, loc_y = ypos, loc_w = width;
+               GLfloat loc_rs = rscale, loc_gs = gscale, loc_bs = bscale, loc_as = ascale;
+	       acc = CC.AccumBuffer + ( loc_y * CC.BufferWidth + loc_x ) * 4;
+	       for (i=0;i<loc_w;i++) {
 		  GLint r, g, b, a;
-		  r = (GLint) ( (GLfloat) (*acc++) * rscale + 0.5F );
-		  g = (GLint) ( (GLfloat) (*acc++) * gscale + 0.5F );
-		  b = (GLint) ( (GLfloat) (*acc++) * bscale + 0.5F );
-		  a = (GLint) ( (GLfloat) (*acc++) * ascale + 0.5F );
+		  r = (GLint) ( (GLfloat) (*acc++) * loc_rs + 0.5F );
+		  g = (GLint) ( (GLfloat) (*acc++) * loc_gs + 0.5F );
+		  b = (GLint) ( (GLfloat) (*acc++) * loc_bs + 0.5F );
+		  a = (GLint) ( (GLfloat) (*acc++) * loc_as + 0.5F );
 		  red[i]   = CLAMP( r, 0, rmax );
 		  green[i] = CLAMP( g, 0, gmax );
 		  blue[i]  = CLAMP( b, 0, bmax );
 		  alpha[i] = CLAMP( a, 0, amax );
 	       }
-	       (*DD.write_color_span)( width, xpos, ypos,
+	       (*DD.write_color_span)( loc_w, loc_x, loc_y,
 				       red, green, blue, alpha, NULL );
 	       ypos++;
 	    }

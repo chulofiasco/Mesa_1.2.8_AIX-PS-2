@@ -55,7 +55,7 @@ GLubyte mipmapImage1[1][1][3];
 
 void makeImages(void)
 {
-    int i, j;
+    volatile long i, j;
     
     for (i = 0; i < 32; i++) {
 	for (j = 0; j < 32; j++) {
@@ -136,7 +136,8 @@ void display(void)
     glTexCoord2f(8.0, 8.0); glVertex3f(2000.0, 1.0, -6000.0);
     glTexCoord2f(8.0, 0.0); glVertex3f(2000.0, -1.0, -6000.0);
     glEnd();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -151,7 +152,7 @@ void myReshape(int w, int h)
 
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();

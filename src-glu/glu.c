@@ -185,7 +185,20 @@ void gluLookAt( GLdouble eyex, GLdouble eyey, GLdouble eyez,
 void gluOrtho2D( GLdouble left, GLdouble right,
 		 GLdouble bottom, GLdouble top )
 {
-   glOrtho( left, right, bottom, top, -1.0, 1.0 );
+   GLdouble m[16];
+   GLdouble dx = right - left;
+   GLdouble dy = top - bottom;
+   if (dx == 0.0 || dy == 0.0) return;
+   
+   m[0] = 2.0 / dx; m[1] = 0.0; m[2] = 0.0; m[3] = 0.0;
+   m[4] = 0.0; m[5] = 2.0 / dy; m[6] = 0.0; m[7] = 0.0;
+   m[8] = 0.0; m[9] = 0.0; m[10] = -1.0; m[11] = 0.0;
+   m[12] = -(right + left) / dx;
+   m[13] = -(top + bottom) / dy;
+   m[14] = 0.0;
+   m[15] = 1.0;
+
+   glMultMatrixd(m);
 }
 
 
@@ -233,6 +246,7 @@ void gluPickMatrix( GLdouble x, GLdouble y,
 
 const GLubyte* gluErrorString( GLenum errorCode )
 {
+   if (errorCode < 65536 && errorCode > 1000) errorCode |= 0x10000;
    static char *tess_error[] = {
       "missing gluEndPolygon",
       "missing gluBeginPolygon",
@@ -344,13 +358,13 @@ const GLubyte* gluGetString( GLenum name )
    static char *extensions = "";
    static char *version = "1.2.8 Mesa";
 
-   switch (name) {
-      case GLU_EXTENSIONS:
-         return (GLubyte *) extensions;
-      case GLU_VERSION:
-	 return (GLubyte *) version;
-      default:
-	 return NULL;
-   }
-}
+   if (name < 65536 && name > 0) name |= 0x10000;
 
+   if (name == GLU_EXTENSIONS || (name & 0xffff) == (GLU_EXTENSIONS & 0xffff)) {
+      return (GLubyte *) extensions;
+   }
+   if (name == GLU_VERSION || (name & 0xffff) == (GLU_VERSION & 0xffff)) {
+      return (GLubyte *) version;
+   }
+   return NULL;
+}

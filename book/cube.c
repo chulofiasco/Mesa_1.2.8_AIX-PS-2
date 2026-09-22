@@ -42,20 +42,51 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "glaux.h"
+
+static int frame_count = 0;
 
 /*  Clear the screen.  Set the current color to white.
  *  Draw the wire frame cube.
  */
 void display (void)
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    GLdouble mv[16];
+
+    frame_count++;
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
     glColor3f (1.0, 1.0, 1.0);
     glLoadIdentity ();	/*  clear the matrix	*/
-    glTranslatef (0.0, 0.0, -5.0);	/*  viewing transformation	*/
+    glTranslatef (0.0, 0.0, -3.5);	/*  viewing transformation	*/
+    glRotatef (20.0, 1.0, 0.0, 0.0);	/*  tilt to show top face	*/
+    glRotatef (-30.0, 0.0, 1.0, 0.0);	/*  rotate to show right face	*/
     glScalef (1.0, 2.0, 1.0);	/*  modeling transformation	*/
+
+    if (frame_count <= 2) {
+        fprintf(stderr, "--- frame %d ---\n", frame_count);
+        glGetDoublev(GL_MODELVIEW_MATRIX, mv);
+        fprintf(stderr, "MV: [%.2f %.2f %.2f %.2f]\n"
+                        "    [%.2f %.2f %.2f %.2f]\n"
+                        "    [%.2f %.2f %.2f %.2f]\n"
+                        "    [%.2f %.2f %.2f %.2f]\n",
+            mv[0],mv[4],mv[8], mv[12],
+            mv[1],mv[5],mv[9], mv[13],
+            mv[2],mv[6],mv[10],mv[14],
+            mv[3],mv[7],mv[11],mv[15]);
+        fprintf(stderr, "calling auxWireCube\n");
+    }
+
     auxWireCube(1.0);	/*  draw the cube	*/
+
+    if (frame_count <= 2) {
+        fprintf(stderr, "auxWireCube returned\n");
+    }
+
     glFlush();
+    auxSwapBuffers();
 }
 
 void myinit (void) {
@@ -80,7 +111,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit ();

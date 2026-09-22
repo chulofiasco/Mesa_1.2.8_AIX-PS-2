@@ -46,13 +46,13 @@
 
 GLUquadricObj * quadObj;
 
-/*  Clear the screen.  For each triangle, set the current 
- *  color and modify the modelview matrix.
- */
 void display(void)
 {
     glClearColor (0.0, 0.0, 0.0, 1.0);
     glClear (GL_COLOR_BUFFER_BIT);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
     glPushMatrix();
     gluQuadricDrawStyle (quadObj, GLU_FILL);
@@ -80,7 +80,7 @@ void display(void)
     glTranslatef (40.0, 40.0, 0.0);
     gluDisk (quadObj, 2.0, 5.0, 10, 10);
     glPopMatrix();
-    glFlush();
+    auxSwapBuffers();
 }
 
 void myinit (void) {
@@ -103,13 +103,9 @@ void myReshape(int w, int h)
     glLoadIdentity ();
 }
 
-/*  Main Loop
- *  Open window with initial window size, title bar, 
- *  RGBA display mode, and handle input events.
- */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit ();

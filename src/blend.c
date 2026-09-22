@@ -271,9 +271,9 @@ static void do_blend( GLuint n, const GLubyte mask[],
 	 if (mask[i]) {
 	    GLint Rs, Gs, Bs, As;  /* Source colors */
 	    GLint Rd, Gd, Bd, Ad;  /* Dest colors */
-	    GLfloat sR, sG, sB, sA;  /* Source scaling */
-	    GLfloat dR, dG, dB, dA;  /* Dest scaling */
-	    GLfloat r, g, b, a;
+	    GLfloat sR=0.0F, sG=0.0F, sB=0.0F, sA=0.0F;  /* Source scaling */
+	    GLfloat dR=0.0F, dG=0.0F, dB=0.0F, dA=0.0F;  /* Dest scaling */
+	    GLfloat r=0.0F, g=0.0F, b=0.0F, a=0.0F;
 
 	    /* Source Color */
 	    Rs = red[i];
@@ -468,10 +468,10 @@ static void do_blend( GLuint n, const GLubyte mask[],
 	 case GL_COPY_INVERTED:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = !red[i];
-		  green[i] = !green[i];
-		  blue[i]  = !blue[i];
-		  alpha[i] = !alpha[i];
+		  red[i]   = ~red[i];
+		  green[i] = ~green[i];
+		  blue[i]  = ~blue[i];
+		  alpha[i] = ~alpha[i];
 	       }
 	    }
 	    break;
@@ -488,10 +488,10 @@ static void do_blend( GLuint n, const GLubyte mask[],
 	 case GL_INVERT:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = !rdest[i];
-		  green[i] = !gdest[i];
-		  blue[i]  = !bdest[i];
-		  alpha[i] = !adest[i];
+		  red[i]   = ~rdest[i];
+		  green[i] = ~gdest[i];
+		  blue[i]  = ~bdest[i];
+		  alpha[i] = ~adest[i];
 	       }
 	    }
 	    break;
@@ -508,10 +508,10 @@ static void do_blend( GLuint n, const GLubyte mask[],
 	 case GL_NAND:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = !(red[i]   & rdest[i]);
-		  green[i] = !(green[i] & gdest[i]);
-		  blue[i]  = !(blue[i]  & bdest[i]);
-		  alpha[i] = !(alpha[i] & adest[i]);
+		  red[i]   = ~(red[i]   & rdest[i]);
+		  green[i] = ~(green[i] & gdest[i]);
+		  blue[i]  = ~(blue[i]  & bdest[i]);
+		  alpha[i] = ~(alpha[i] & adest[i]);
 	       }
 	    }
 	    break;
@@ -528,10 +528,10 @@ static void do_blend( GLuint n, const GLubyte mask[],
 	 case GL_NOR:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = !(red[i]   | rdest[i]);
-		  green[i] = !(green[i] | gdest[i]);
-		  blue[i]  = !(blue[i]  | bdest[i]);
-		  alpha[i] = !(alpha[i] | adest[i]);
+		  red[i]   = ~(red[i]   | rdest[i]);
+		  green[i] = ~(green[i] | gdest[i]);
+		  blue[i]  = ~(blue[i]  | bdest[i]);
+		  alpha[i] = ~(alpha[i] | adest[i]);
 	       }
 	    }
 	    break;
@@ -548,50 +548,50 @@ static void do_blend( GLuint n, const GLubyte mask[],
 	 case GL_EQUIV:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = !(red[i]   ^ rdest[i]);
-		  green[i] = !(green[i] ^ gdest[i]);
-		  blue[i]  = !(blue[i]  ^ bdest[i]);
-		  alpha[i] = !(alpha[i] ^ adest[i]);
+		  red[i]   = ~(red[i]   ^ rdest[i]);
+		  green[i] = ~(green[i] ^ gdest[i]);
+		  blue[i]  = ~(blue[i]  ^ bdest[i]);
+		  alpha[i] = ~(alpha[i] ^ adest[i]);
 	       }
 	    }
 	    break;
 	 case GL_AND_REVERSE:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = red[i]   & !rdest[i];
-		  green[i] = green[i] & !gdest[i];
-		  blue[i]  = blue[i]  & !bdest[i];
-		  alpha[i] = alpha[i] & !adest[i];
+		  red[i]   = red[i]   & ~rdest[i];
+		  green[i] = green[i] & ~gdest[i];
+		  blue[i]  = blue[i]  & ~bdest[i];
+		  alpha[i] = alpha[i] & ~adest[i];
 	       }
 	    }
 	    break;
 	 case GL_AND_INVERTED:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = !red[i]   & rdest[i];
-		  green[i] = !green[i] & gdest[i];
-		  blue[i]  = !blue[i]  & bdest[i];
-		  alpha[i] = !alpha[i] & adest[i];
+		  red[i]   = ~red[i]   & rdest[i];
+		  green[i] = ~green[i] & gdest[i];
+		  blue[i]  = ~blue[i]  & bdest[i];
+		  alpha[i] = ~alpha[i] & adest[i];
 	       }
 	    }
 	    break;
 	 case GL_OR_REVERSE:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = red[i]   | !rdest[i];
-		  green[i] = green[i] | !gdest[i];
-		  blue[i]  = blue[i]  | !bdest[i];
-		  alpha[i] = alpha[i] | !adest[i];
+		  red[i]   = red[i]   | ~rdest[i];
+		  green[i] = green[i] | ~gdest[i];
+		  blue[i]  = blue[i]  | ~bdest[i];
+		  alpha[i] = alpha[i] | ~adest[i];
 	       }
 	    }
 	    break;
 	 case GL_OR_INVERTED:
 	    for (i=0;i<n;i++) {
 	       if (mask[i]) {
-		  red[i]   = !red[i]   | rdest[i];
-		  green[i] = !green[i] | gdest[i];
-		  blue[i]  = !blue[i]  | bdest[i];
-		  alpha[i] = !alpha[i] | adest[i];
+		  red[i]   = ~red[i]   | rdest[i];
+		  green[i] = ~green[i] | gdest[i];
+		  blue[i]  = ~blue[i]  | bdest[i];
+		  alpha[i] = ~alpha[i] | adest[i];
 	       }
 	    }
 	    break;

@@ -64,7 +64,8 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f(1.0, 1.0, 1.0);
     glEvalMesh2(GL_FILL, 0, 20, 0, 20);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 #define	imageWidth 64
@@ -73,7 +74,7 @@ GLubyte image[3*imageWidth*imageHeight];
 
 void makeImage(void)
 {
-    int i, j;
+    volatile long i, j;
     float ti, tj;
     
     for (i = 0; i < imageWidth; i++) {
@@ -129,7 +130,7 @@ void myReshape(int w, int h)
 
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 300, 300);
     auxInitWindow (argv[0]);
     myinit();

@@ -107,7 +107,7 @@ void display(void)
 	    auxSolidTorus (0.275, 0.85);
 	glPopMatrix();
     glPopMatrix();
-
+    auxSwapBuffers();
 }
 
 /*  Whenever the window is reshaped, redefine the 
@@ -151,7 +151,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB 
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB 
 	| AUX_DEPTH | AUX_STENCIL);
     auxInitPosition (0, 0, 400, 400);
     auxInitWindow (argv[0]);

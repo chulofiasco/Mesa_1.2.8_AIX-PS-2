@@ -35,12 +35,13 @@
 #  define strrchr rindex
 # endif
 char *strchr (), *strrchr ();
-# ifndef HAVE_MEMCPY
-#  define memcpy(d, s, n) bcopy ((s), (d), (n))
-# endif
-# ifndef HAVE_MEMMOVE
-#  define memmove(d, s, n) bcopy ((s), (d), (n))
-# endif
+#endif
+
+#ifndef HAVE_MEMCPY
+# define memcpy(d, s, n) bcopy ((s), (d), (n))
+#endif
+#ifndef HAVE_MEMMOVE
+# define memmove(d, s, n) bcopy ((s), (d), (n))
 #endif
 
 #ifndef M_PI
@@ -164,16 +165,16 @@ Move (Widget w, XEvent *event, String *argv, Cardinal *argc)
       MesaView(w).u.polar.r *= 1.1;
       break;
     case 'l':
-      MesaView(w).u.polar.phi += scale * M_PI;
-      break;
-    case 'r':
       MesaView(w).u.polar.phi -= scale * M_PI;
       break;
+    case 'r':
+      MesaView(w).u.polar.phi += scale * M_PI;
+      break;
     case 'u':
-      MesaView(w).u.polar.theta -= scale * M_PI;
+      MesaView(w).u.polar.theta += scale * M_PI;
       break;
     case 'd':
-      MesaView(w).u.polar.theta += scale * M_PI;
+      MesaView(w).u.polar.theta -= scale * M_PI;
       break;
     }
 
@@ -351,9 +352,9 @@ mesa_ortho (volume v)
 static void
 mesa_look_at (look_at l)
 {
-  gluLookAt (l.eyex, l.eyex, l.eyez,
-	     l.ctrx, l.ctrx, l.ctrz,
-	     l.upx, l.upx, l.upz);
+  gluLookAt (l.eyex, l.eyey, l.eyez,
+	     l.ctrx, l.ctry, l.ctrz,
+	     l.upx, l.upy, l.upz);
 }
 
 
@@ -366,8 +367,8 @@ mesa_polar (polar p)
   cos_th = cos (p.theta);
   sin_phi = sin (p.phi);
   cos_phi = cos (p.phi);
-  u_sin_th = cos_th;
-  u_cos_th = -sin_th;
+  u_sin_th = -cos_th;
+  u_cos_th = sin_th;
   gluLookAt (r*sin_th*cos_phi, r*cos_th, r*sin_th*sin_phi,
 	     0.0, 0.0, 0.0,
 	     u_sin_th*cos_phi, u_cos_th, u_sin_th*sin_phi);

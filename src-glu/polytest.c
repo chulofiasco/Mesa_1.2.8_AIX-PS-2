@@ -542,40 +542,25 @@ void tess_find_contour_hierarchies(GLUtriangulatorObj *tobj)
 			{
 				/* check if contour completely contained in EXTERIOR */
 				result=is_contour_contained_in(tmp_contour_ptr,contours[i]);
-				switch(result)
+				if (result == GLU_INTERIOR || (result & 0xffff) == (GLU_INTERIOR & 0xffff))
 				{
-					case GLU_INTERIOR:
-						/* now we have to check if contour is inside interiors */
-						/* or not */
-						/* any interiors? */
 						if(tmp_contour_ptr->next!=NULL &&
 							tmp_contour_ptr->next->type==GLU_INTERIOR)
 						{
-							/* for all interior, check if inside any of them */
-							/* if not inside any of interiors, its another */
-							/* interior */
-							/* or it may contain some interiors, then change */
-							/* the contained interiors to exterior ones */
 							add_interior_with_hierarchy_check(tobj,
 								tmp_contour_ptr,contours[i]);
 						}
 						else
 						{
-							/* not in interior, add as new interior contour */
 							add_new_interior(tobj,tmp_contour_ptr,contours[i]);
 						}
 						hierarchy_changed=GL_TRUE;
-						break;
-					case GLU_EXTERIOR:
-						/* ooops, the marked as EXTERIOR (contours[i]) is */
-						/* actually an interior of tmp_contour_ptr */
-						/*  reverse the local hierarchy */
+				}
+				else if (result == GLU_EXTERIOR || (result & 0xffff) == (GLU_EXTERIOR & 0xffff))
+				{
 						reverse_hierarchy_and_add_exterior(tobj,tmp_contour_ptr,
 							contours[i]);
 						hierarchy_changed=GL_TRUE;
-						break;
-					case GLU_NO_ERROR:
-						break;
 				}
 			}
 			if(hierarchy_changed)
@@ -696,20 +681,18 @@ static void add_interior_with_hierarchy_check(
 	tess_contour *contour)
 {
 	tess_contour *ptr;
+	GLenum test;
 
 	/* for all interiors of outer check if they are interior of contour */
 	/* if so, change that interior to exterior and move it of of the */
 	/* interior sequence */
 	if(outer->next!=NULL && outer->next->type==GLU_INTERIOR)
 	{
-		GLenum test;
-
 		for(ptr=outer->next;ptr!=NULL && ptr->type==GLU_INTERIOR;ptr=ptr->next)
 		{
 			test=is_contour_contained_in(ptr,contour);
-			switch(test)
+			if (test == GLU_INTERIOR || (test & 0xffff) == (GLU_INTERIOR & 0xffff))
 			{
-				case GLU_INTERIOR:
 					/* contour is contained in one of the interiors */
 					/* check if possibly contained in other exteriors */
 					/* move ptr to first EXTERIOR */
@@ -720,15 +703,13 @@ static void add_interior_with_hierarchy_check(
 					else
 						add_exterior_with_check(tobj,ptr,contour);
 					return;
-				case GLU_EXTERIOR:
+			}
+			else if (test == GLU_EXTERIOR || (test & 0xffff) == (GLU_EXTERIOR & 0xffff))
+			{
 					/* one of the interiors is contained in the contour */
 					/* change it to EXTERIOR, and shift it away from the */
 					/* interior sequence */
 					shift_interior_to_exterior(tobj,ptr);
-					break;
-				case GLU_NO_ERROR:
-					/* disjoint */
-					break;
 			}
 		}
 	}
@@ -741,29 +722,29 @@ static void reverse_hierarchy_and_add_exterior(
 	tess_contour *outer,
 	tess_contour *contour)
 {
-	tess_contour *ptr;
+	GLenum test;
 
-	/* reverse INTERIORS to EXTERIORS */
-	/* any INTERIORS? */
-	if(outer->next!=NULL && outer->next->type==GLU_INTERIOR)
-		for(ptr=outer->next;ptr!=NULL && ptr->type==GLU_INTERIOR;ptr=ptr->next)
-			ptr->type=GLU_EXTERIOR;
-	/* the outer now becomes inner */
-	outer->type=GLU_INTERIOR;
-	/* contour is the EXTERIOR */
-	contour->next=outer;
-	if(tobj->contours==outer)
+	/* this contour might be interior to further exteriors - check */
+	/* if not, just add as a new exterior */
+	for(;outer!=NULL && outer->type==GLU_EXTERIOR;outer=outer->next)
 	{
-		/* first contour beeing reversed */
-		contour->previous=NULL;
-		tobj->contours=contour;
+		test=is_contour_contained_in(outer,contour);
+		if (test == GLU_INTERIOR || (test & 0xffff) == (GLU_INTERIOR & 0xffff))
+		{
+				if(outer->next!=NULL && outer->next->type==GLU_INTERIOR)
+				{
+					add_interior_with_hierarchy_check(tobj,
+						outer,contour);
+				}
+				else
+				{
+					add_new_interior(tobj,outer,contour);
+				}
+				return;
+		}
 	}
-	else
-	{
-		outer->previous->next=contour;
-		contour->previous=outer->previous;
-	}
-	outer->previous=contour;
+	/* add contour to the exterior sequence */
+	add_new_exterior(tobj,contour);
 }
 
 static void shift_interior_to_exterior(
@@ -789,9 +770,8 @@ static void add_exterior_with_check(
 	for(;outer!=NULL && outer->type==GLU_EXTERIOR;outer=outer->next)
 	{
 		test=is_contour_contained_in(outer,contour);
-		switch(test)
+		if (test == GLU_INTERIOR || (test & 0xffff) == (GLU_INTERIOR & 0xffff))
 		{
-			case GLU_INTERIOR:
 				/* now we have to check if contour is inside interiors */
 				/* or not */
 				/* any interiors? */
@@ -811,9 +791,6 @@ static void add_exterior_with_check(
 					add_new_interior(tobj,outer,contour);
 				}
 				return;
-			case GLU_NO_ERROR:
-				/* disjoint */
-				break;
 		}
 	}
 	/* add contour to the exterior sequence */
@@ -863,7 +840,7 @@ static GLenum cut_out_hole(
 	tess_vertex *v1,*v2,*tmp_vertex;
 	GLuint vertex1_cnt,vertex2_cnt,tmp_vertex_cnt;
 	GLuint i,j,k;
-	GLenum test;
+	GLenum test = 0;
 
 	/* find an edge connecting contour and hole not intersecting any other */
 	/* edge belonging to either the contour or any of the other holes */

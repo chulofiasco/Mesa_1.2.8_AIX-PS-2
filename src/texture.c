@@ -891,7 +891,7 @@ void gl_do_texgen( const GLfloat obj[4],
                    const GLfloat normal[3],
                    GLfloat texcoord[4] )
 {
-   GLfloat u[3], two_nn, m, fx, fy, fz;
+   GLfloat u[3], two_nn, m=0.0F, fx, fy=0.0F, fz;
 
    if (CC.Texture.TexGenEnabled & S_BIT) {
       switch( CC.Texture.GenModeS) {
@@ -904,10 +904,10 @@ void gl_do_texgen( const GLfloat obj[4],
 	 case GL_SPHERE_MAP:
             COPY_3V( u, eye );
             NORMALIZE_3V( u );
-	    two_nn = 2.0*DOT3(normal,normal);
-	    fx = u[0] - two_nn * u[0];
-	    fy = u[1] - two_nn * u[1];
-	    fz = u[2] - two_nn * u[2];
+	    two_nn = 2.0*DOT3(normal,u);
+	    fx = u[0] - two_nn * normal[0];
+	    fy = u[1] - two_nn * normal[1];
+	    fz = u[2] - two_nn * normal[2];
 	    m = 2.0 * sqrt( fx*fx + fy*fy + (fz+1.0)*(fz+1.0) );
 	    if (m==0.0) {
 	       texcoord[0] = 0.0;
@@ -928,7 +928,17 @@ void gl_do_texgen( const GLfloat obj[4],
 	    texcoord[1] = DOT4( eye, CC.Texture.EyePlaneT );
 	    break;
 	 case GL_SPHERE_MAP:
-	    /* TODO: safe to assume that m and fy valid from above??? */
+	    /* Recompute sphere map values if S_BIT did not already do so */
+	    if (!((CC.Texture.TexGenEnabled & S_BIT) &&
+	          (CC.Texture.GenModeS == GL_SPHERE_MAP))) {
+	        COPY_3V( u, eye );
+	        NORMALIZE_3V( u );
+	        two_nn = 2.0*DOT3(normal,u);
+	        fx = u[0] - two_nn * normal[0];
+	        fy = u[1] - two_nn * normal[1];
+	        fz = u[2] - two_nn * normal[2];
+	        m = 2.0 * sqrt( fx*fx + fy*fy + (fz+1.0)*(fz+1.0) );
+	    }
 	    if (m==0.0) {
 	       texcoord[1] = 0.0;
 	    }
@@ -1654,12 +1664,12 @@ void gl_texture_pixels_1d( GLuint n, GLfloat s[],
     * Compute texel colors.
     */
    for (i=0;i<n;i++) {
-      GLfloat ss;
+      GLfloat ss = 0.0F;
       GLboolean border;
 
       border = GL_FALSE;   /* Use border pixel color? */
 
-      /* S COORDINATE */
+      /* S COORDINATE - ss initialized to 0 in case GL_CLAMP+border skips assignment */
       if (CC.Texture.WrapS1D==GL_REPEAT) {
          ss = s[i];
          while (ss<0.0F)  ss += 1.0F;
@@ -1748,12 +1758,12 @@ void gl_texture_pixels_2d( GLuint n,
     * Compute texel colors.
     */
    for (i=0;i<n;i++) {
-      GLfloat ss, tt;
+      GLfloat ss = 0.0F, tt = 0.0F;
       GLboolean border;
 
       border = GL_FALSE;   /* Use border pixel color? */
 
-      /* S COORDINATE */
+      /* S COORDINATE - ss/tt initialized to 0 in case GL_CLAMP+border skips assignment */
       if (CC.Texture.WrapS2D==GL_REPEAT) {
          ss = s[i];
          while (ss<0.0F)  ss += 1.0F;

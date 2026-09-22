@@ -71,7 +71,8 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glColor3f (1.0, 1.0, 1.0);
     auxWireIcosahedron(1.0);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -89,7 +90,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 400, 400);
     auxInitWindow (argv[0]);
     myinit();

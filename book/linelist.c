@@ -86,7 +86,8 @@ void display(void)
     drawOneLine (50.0, 50.0, 350.0, 50.0);
     glCallList (offset);
     drawOneLine (50.0, 25.0, 350.0, 25.0);
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 }
 
 /*  Main Loop
@@ -95,7 +96,7 @@ void display(void)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 400, 150);
     auxInitWindow (argv[0]);
     myinit ();

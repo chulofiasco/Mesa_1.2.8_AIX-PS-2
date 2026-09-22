@@ -206,10 +206,15 @@ GLUnurbsObj *theNurbs;
 
 static void ErrorCallback(GLenum which)
 {
-
+    /* Both `which` and `expectedError` are GLenum (16-bit) with consistently
+     * truncated values — the equality comparison is correct as-is.
+     * Use unsigned long only to display the full 32-bit code in the message. */
     if (which != expectedError) {
-	fprintf(stderr, "Unexpected error occured (%d):\n", which);
-	fprintf(stderr, "    %s\n", gluErrorString(which));
+        unsigned long which32 = (unsigned long)which;
+        if (which32 > 0UL && which32 < 65536UL) {
+            which32 |= 0x10000UL;
+        }
+        fprintf(stderr, "Unexpected error occured (%lu):\n", which32);
     }
 }
 

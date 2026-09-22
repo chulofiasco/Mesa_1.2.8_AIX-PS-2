@@ -98,7 +98,7 @@ void myinit (void)
 void display(void)
 {
     GLfloat white[3] = { 1.0, 1.0, 1.0 };
-    int i, j;
+    volatile long i, j;
     char teststring[33];
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -114,7 +114,8 @@ void display(void)
     printString("The quick brown fox jumps");
     glRasterPos2i(20, 82);
     printString("over a lazy dog.");
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -133,7 +134,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     auxReshapeFunc (myReshape);

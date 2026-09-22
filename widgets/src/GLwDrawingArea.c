@@ -501,8 +501,7 @@ Initialize (GLwDrawingAreaWidget req,
      TrueColor and DirectColor visuals.  If this is not available
      and for all other visuals, we allocate a fresh colormap. */
 
-  if (!new->glwDrawingArea.rgba
-      && (vi->visualid == XVisualIDFromVisual (DefaultVisual (dpy, scr))))
+  if (vi->visualid == XVisualIDFromVisual (DefaultVisual (dpy, scr)))
     new->core.colormap = DefaultColormap (dpy, scr);
   else
     new->core.colormap = lookup_colormap ((Widget) new, vi, AllocNone);

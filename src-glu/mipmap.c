@@ -87,8 +87,8 @@ GLint gluScaleImage( GLenum format,
                      GLint widthout, GLint heightout,
                      GLenum typeout, void *dataout )
 {
-   GLuint components, i, j, k, n;
-   GLfloat *tempin, *tempout, *in, *out;
+   GLuint components, i, j, k;
+   GLfloat *tempin, *tempout;
    GLfloat sx, sy;
    GLint unpackrowlength, unpackalignment, unpackskiprows, unpackskippixels;
    GLint packrowlength, packalignment, packskiprows, packskippixels;

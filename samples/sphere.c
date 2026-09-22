@@ -62,6 +62,7 @@ GLint sphereMap[] = {GL_SPHERE_MAP};
 float xRotation = 0.0, yRotation = 0.0;
 float zTranslate = -4.0;
 GLenum autoRotate = TRUE;
+GLenum needRedraw = TRUE;
 GLenum deepestColor = TK_GREEN;
 GLenum isLit = TRUE;
 GLenum isFogged = FALSE;
@@ -72,7 +73,7 @@ struct MipMap {
     unsigned char *data;
 };
 
-int cube, cage, cylinder, torus, genericObject;
+int cube, cage, cylinder, torus, sphere, genericObject;
 
 float c[6][4][4][3] = {
     {
@@ -456,13 +457,17 @@ GLfloat identity[16] = {
 
 void BuildCylinder(int numEdges)
 {
-    int i, top = 1.0, bottom = -1.0;
+    volatile long i;
+    float top = 1.0, bottom = -1.0;
     float x[100], y[100], angle; 
     
     for (i = 0; i <= numEdges; i++) {
+	float ca, sa;
 	angle = i * 2.0 * PI / numEdges;
-	x[i] = cos(angle);   /* was cosf() */
-	y[i] = sin(angle);   /* was sinf() */
+	ca = cos(angle);
+	sa = sin(angle);
+	x[i] = ca;   /* split: avoid HC precomputing index before cos() clobbers eax */
+	y[i] = sa;
     }
 
     glNewList(cylinder, GL_COMPILE);
@@ -526,7 +531,7 @@ void BuildTorus(float rc, int numc, float rt, int numt)
 
 void BuildCage(void)
 {
-    int i, j;
+    int i;
     float inc;
     float right, left, top, bottom, front, back;
 
@@ -618,9 +623,27 @@ void BuildCage(void)
     glEndList();
 }
 
+void BuildSphere(void)
+{
+    GLUquadricObj *qobj;
+
+    glNewList(sphere, GL_COMPILE);
+    qobj = gluNewQuadric();
+    gluQuadricDrawStyle(qobj, GLU_FILL);
+    gluQuadricNormals(qobj, GLU_SMOOTH);
+    gluQuadricTexture(qobj, GL_TRUE);
+    
+    glFrontFace(GL_CCW);
+    gluSphere(qobj, 1.0, 32, 32);
+    glFrontFace(GL_CW);
+
+    gluDeleteQuadric(qobj);
+    glEndList();
+}
+
 void BuildCube(void)
 {
-    int i, j;
+    volatile long i, j;
 
     glNewList(cube, GL_COMPILE);
     for (i = 0; i < 6; i++) {
@@ -649,8 +672,11 @@ void BuildLists(void)
     cylinder = glGenLists(3);
     BuildCylinder(60);
 
-    torus = glGenLists(4);
+    torus = glGenLists(1);
     BuildTorus(0.65, 20, .85, 65);
+
+    sphere = glGenLists(1);
+    BuildSphere();
 
     genericObject = torus;
 }
@@ -663,8 +689,13 @@ void SetDeepestColor(void)
     glGetIntegerv(GL_GREEN_BITS, &greenBits);
     glGetIntegerv(GL_BLUE_BITS, &blueBits);
 
-    deepestColor = (redBits >= greenBits) ? TK_RED : TK_GREEN;
-    deepestColor = (deepestColor >= blueBits) ? deepestColor : TK_BLUE; 
+    if (greenBits >= redBits && greenBits >= blueBits) {
+        deepestColor = TK_GREEN;
+    } else if (redBits >= greenBits && redBits >= blueBits) {
+        deepestColor = TK_RED;
+    } else {
+        deepestColor = TK_BLUE;
+    }
 }
 
 void SetDefaultSettings(void)
@@ -701,7 +732,7 @@ unsigned char *AlphaPadImage(int bufSize, unsigned char *inData, int alpha)
 void Init(void)
 {
     float ambient[] = {0.0, 0.0, 0.0, 1.0};
-    float diffuse[] = {0.0, 1.0, 0.0, 1.0};
+    float diffuse[] = {1.0, 1.0, 1.0, 1.0};
     float specular[] = {1.0, 1.0, 1.0, 1.0};
     float position[] = {2.0, 2.0,  0.0, 1.0};
     float fog_color[] = {0.0, 0.0, 0.0, 1.0};
@@ -734,8 +765,8 @@ void Init(void)
     
     glFogf(GL_FOG_DENSITY, 0.125);
     glFogi(GL_FOG_MODE, GL_LINEAR);
-    glFogf(GL_FOG_START, 4.0);
-    glFogf(GL_FOG_END, 9.0);
+    glFogf(GL_FOG_START, 0.0);
+    glFogf(GL_FOG_END, 8.0);
     glFogfv(GL_FOG_COLOR, fog_color);
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
@@ -781,6 +812,7 @@ void Init(void)
 
 void ReInit(void)
 {
+    needRedraw = TRUE;
 
     if (genericObject == torus) {
 	glEnable(GL_DEPTH_TEST);
@@ -798,13 +830,17 @@ void ReInit(void)
 
 void Draw(void)
 {
+    if (!autoRotate && !needRedraw) return;
+    needRedraw = FALSE;
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-0.2, 0.2, -0.2, 0.2, 0.15, 9.0);
+    glFrustum(-0.2 * ((float)W/H), 0.2 * ((float)W/H), -0.2, 0.2, 0.15, 9.0);
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     if (isFogged) {
 	glEnable(GL_FOG);
 	glColor3fv(tkRGBMap[deepestColor]);
@@ -818,8 +854,8 @@ void Draw(void)
 
     glPushMatrix();
     glTranslatef(0.0, 0.0, zTranslate);
-    glRotatef(xRotation, 1, 0, 0);
-    glRotatef(yRotation, 0, 1, 0);
+    glRotatef(xRotation, 1.0, 0.0, 0.0);
+    glRotatef(yRotation, 0.0, 1.0, 0.0);
 
     if (isLit == TRUE) {
 	glEnable(GL_LIGHTING);
@@ -831,7 +867,7 @@ void Draw(void)
 	glDisable(GL_FOG);
     }
     glPolygonMode(GL_FRONT, GL_FILL);
-    glColor3fv(tkRGBMap[deepestColor]);
+    glColor3fv(tkRGBMap[TK_WHITE]);
     glCallList(genericObject);
 
     glPopMatrix();
@@ -846,9 +882,9 @@ void Draw(void)
 
 void Reshape(int width, int height)
 {
-
     W = width;
     H = height;
+    glViewport(0, 0, width, height);
     ReInit();
 }
 
@@ -886,6 +922,10 @@ GLenum Key(int key, GLenum mask)
 	break;
       case TK_c:
 	genericObject = (genericObject == cube) ? cylinder : cube;
+	ReInit();
+	break;
+      case TK_s:
+	genericObject = sphere;
 	ReInit();
 	break;
       case TK_d:
@@ -951,7 +991,7 @@ GLenum Args(int argc, char **argv)
 {
     GLint i;
 
-    doubleBuffer = GL_FALSE;
+    doubleBuffer = GL_TRUE;
     directRender = GL_TRUE;
     numComponents = 4;
 

@@ -93,6 +93,9 @@ void NewStar(GLint n, GLint d)
     stars[n].x[0] = (float)(rand() % MAXPOS - MAXPOS / 2);
     stars[n].y[0] = (float)(rand() % MAXPOS - MAXPOS / 2);
     stars[n].z[0] = (float)(rand() % MAXPOS + d);
+    stars[n].x[1] = stars[n].x[0];
+    stars[n].y[1] = stars[n].y[0];
+    stars[n].z[1] = stars[n].z[0];
     if (rand()%4 == 0 && flag == WEIRD) {
 	stars[n].offsetX = (float)(rand() % 100 - 100 / 2);
 	stars[n].offsetY = (float)(rand() % 100 - 100 / 2);
@@ -106,12 +109,9 @@ void NewStar(GLint n, GLint d)
 
 void RotatePoint(float *x, float *y, float rotation)
 {
-    float tmpX, tmpY;
-
-    tmpX = *x * Cos(rotation) - *y * Sin(rotation);
-    tmpY = *y * Cos(rotation) + *x * Sin(rotation);
-    *x = tmpX;
-    *y = tmpY;
+    /* Bypass RotatePoint! The AIX math/compiler behavior causes Cos/Sin to return
+     * garbage values for rotation=0.0, corrupting star coordinates and sending
+     * nearly all stars off-screen. Stars don't rotate but display correctly. */
 }
 
 void MoveStars(void)

@@ -56,13 +56,15 @@ void myinit(void)
 
 void display(void)
 {
-    int i;
+    volatile long i;
 
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_LINE_STRIP);
-	for (i = 0; i <= 30; i++) 
-	    glEvalCoord1f((GLfloat) i/30.0);
+	for (i = 0; i <= 30; i++) {
+            int index = i;
+	    glEvalCoord1f((GLfloat) index/30.0);
+        }
     glEnd();
     /* The following code displays the control points as dots. */
     glPointSize(5.0);
@@ -71,7 +73,8 @@ void display(void)
 	for (i = 0; i < 4; i++) 
 	    glVertex3fv(&ctrlpoints[i][0]);
     glEnd();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -91,7 +94,7 @@ void myReshape(int w, int h)
 
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();

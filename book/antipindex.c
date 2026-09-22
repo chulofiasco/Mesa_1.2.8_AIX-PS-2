@@ -53,12 +53,13 @@
  */
 void myinit(void)
 {
-    int i;
+    volatile long i;
 
     for (i = 0; i < RAMPSIZE; i++) {
+        int index = i;
 	GLfloat shade;
-	shade = (GLfloat) i/(GLfloat) RAMPSIZE;
-	auxSetOneColor (RAMPSTART+(GLint)i, shade, shade, shade);
+	shade = (GLfloat) index/(GLfloat) RAMPSIZE;
+	auxSetOneColor (RAMPSTART+index, shade, shade, shade);
     }
     glEnable (GL_POINT_SMOOTH);
     glHint (GL_POINT_SMOOTH_HINT, GL_FASTEST);
@@ -70,16 +71,19 @@ void myinit(void)
 
 void display(void)
 {
-    int i;
+    volatile long i;
 
     glClear(GL_COLOR_BUFFER_BIT);
     glIndexi (RAMPSTART);
     glBegin (GL_POINTS);
 	for (i = 1; i < 10; i++) {
-	    glVertex2f ((GLfloat) i * 10.0, (GLfloat) i * 10.0);
-	}
+        int index = (int)i;
+	glIndexi (RAMPSTART + RAMPSIZE - 1);
+	glVertex2f ((GLfloat) index * 10.0, (GLfloat) index * 10.0);
+    }
     glEnd ();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -103,7 +107,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_INDEX);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_INDEX);
     auxInitPosition (0, 0, 100, 100);
     auxInitWindow (argv[0]);
     myinit();

@@ -546,7 +546,7 @@ noFaultXAllocColor( Display *dpy, Colormap cmap, int cmapSize,
  */
 static int setup_grayscale( XMesaContext c, Window window, Colormap cmap )
 {
-   int gray, i;
+   int gray;
    int colorsfailed = 0;
    XColor xcol;
    XColor *ctable = NULL;
@@ -617,7 +617,7 @@ static int setup_dithered_color( XMesaContext c, Window window, Colormap cmap )
    int r, g, b, i;
    int colorsfailed = 0;
    XColor xcol;
-   XColor *allcolors = NULL, *acptr; 
+   XColor *allcolors = NULL;
 
    if (c->depth<4 || c->depth>16 || !cmap) {
       return 0;

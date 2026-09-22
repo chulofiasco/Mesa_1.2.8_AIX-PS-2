@@ -121,7 +121,8 @@ void display (void)
     glLightfv (GL_LIGHT0, GL_POSITION, local_light);
     drawPlane ();
     glPopMatrix ();
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -144,7 +145,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 200);
     auxInitWindow (argv[0]);
     myinit();

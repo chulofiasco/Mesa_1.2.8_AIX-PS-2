@@ -59,11 +59,12 @@ void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f (1.0, 1.0, 1.0);
-    glRasterPos2i (20.5, 20.5);
+    glRasterPos2f (20.5, 20.5);
     glBitmap (10, 12, 0.0, 0.0, 12.0, 0.0, rasters);
     glBitmap (10, 12, 0.0, 0.0, 12.0, 0.0, rasters);
     glBitmap (10, 12, 0.0, 0.0, 12.0, 0.0, rasters);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -81,7 +82,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();

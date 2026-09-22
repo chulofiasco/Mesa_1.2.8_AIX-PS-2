@@ -115,13 +115,19 @@ void glVertex2s( GLshort x, GLshort y )
 
 void glVertex3d( GLdouble x, GLdouble y, GLdouble z )
 {
-   (*CC.VertexFunc)( (GLfloat) x, (GLfloat) y, (GLfloat) z, 1.0F );
+   volatile GLfloat lx = (GLfloat) x;
+   volatile GLfloat ly = (GLfloat) y;
+   volatile GLfloat lz = (GLfloat) z;
+   (*CC.VertexFunc)( lx, ly, lz, 1.0F );
 }
 
 
 void glVertex3f( GLfloat x, GLfloat y, GLfloat z )
 {
-   (*CC.VertexFunc)( x, y, z, 1.0F );
+   volatile GLfloat lx = x;
+   volatile GLfloat ly = y;
+   volatile GLfloat lz = z;
+   (*CC.VertexFunc)( lx, ly, lz, 1.0F );
 }
 
 
@@ -287,13 +293,16 @@ void glNormal3d( GLdouble nx, GLdouble ny, GLdouble nz )
 
 void glNormal3f( GLfloat nx, GLfloat ny, GLfloat nz )
 {
+   volatile GLfloat lnx = nx;
+   volatile GLfloat lny = ny;
+   volatile GLfloat lnz = nz;
    if (CC.CompileFlag) {
-      gl_save_normal3f( nx, ny, nz );
+      gl_save_normal3f( lnx, lny, lnz );
       if (!CC.ExecuteFlag) return;
    }
-   CC.Current.Normal[0] = nx;
-   CC.Current.Normal[1] = ny;
-   CC.Current.Normal[2] = nz;
+   CC.Current.Normal[0] = lnx;
+   CC.Current.Normal[1] = lny;
+   CC.Current.Normal[2] = lnz;
 }
 
 

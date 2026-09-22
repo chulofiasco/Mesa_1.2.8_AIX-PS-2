@@ -70,6 +70,8 @@ void myinit(void)
     glClearColor (0.0, 0.0, 0.0, 0.0);
 }
 
+void display(void);
+
 void toggleSmooth (AUX_EVENTREC *event)
 {
     if (polySmooth) {
@@ -84,6 +86,7 @@ void toggleSmooth (AUX_EVENTREC *event)
 	glEnable (GL_POLYGON_SMOOTH);
 	glDisable (GL_DEPTH_TEST);
     }
+    display();
 }
 
 /*  Note:  polygons must be drawn from back to front
@@ -91,9 +94,9 @@ void toggleSmooth (AUX_EVENTREC *event)
  */
 void display(void)
 {
-    GLfloat position[] = { 0.0, 0.0, 1.0, 0.0 };
-    GLfloat mat_cube1[] = { 0.75, 0.75, 0.0, 1.0 };
-    GLfloat mat_cube2[] = { 0.0, 0.75, 0.75, 1.0 };
+    static GLfloat position[] = { 0.0, 0.0, 1.0, 0.0 };
+    static GLfloat mat_cube1[] = { 0.75, 0.75, 0.0, 1.0 };
+    static GLfloat mat_cube2[] = { 0.0, 0.75, 0.75, 1.0 };
 
     if (polySmooth)
 	glClear (GL_COLOR_BUFFER_BIT);
@@ -101,27 +104,31 @@ void display(void)
 	glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glPushMatrix ();
-	glTranslatef (0.0, 0.0, -8.0);    
-	glLightfv (GL_LIGHT0, GL_POSITION, position);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glBlendFunc (GL_SRC_ALPHA_SATURATE, GL_ONE);
-
-	glPushMatrix ();
-	glRotatef (30.0, 1.0, 0.0, 0.0);
-	glRotatef (60.0, 0.0, 1.0, 0.0);
-	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_cube1);
-	auxSolidCube (1.0);
-	glPopMatrix ();
-
-	glTranslatef (0.0, 0.0, -2.0);    
+	/* Draw Back Cube First (Cyan, shifted right) */
+	glTranslatef (0.8, 0.0, -10.0);    
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_cube2);
+	glPushMatrix();
 	glRotatef (30.0, 0.0, 1.0, 0.0);
 	glRotatef (60.0, 1.0, 0.0, 0.0);
 	auxSolidCube (1.0);
+	glPopMatrix();
+
+	/* Draw Front Cube Second (Yellow, shifted left) */
+	glTranslatef (-1.6, 0.0, 2.0); /* Translate X by -1.6, Z back to -8.0 */
+	glLightfv (GL_LIGHT0, GL_POSITION, position);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_cube1);
+	glPushMatrix();
+	glRotatef (30.0, 1.0, 0.0, 0.0);
+	glRotatef (60.0, 0.0, 1.0, 0.0);
+	auxSolidCube (1.0);
+	glPopMatrix();
 
     glPopMatrix ();
 
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -137,7 +144,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_ALPHA | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_ALPHA | AUX_DEPTH);
     auxInitPosition (0, 0, 200, 200);
     auxInitWindow (argv[0]);
     auxMouseFunc (AUX_LEFTBUTTON, AUX_MOUSEDOWN, toggleSmooth);

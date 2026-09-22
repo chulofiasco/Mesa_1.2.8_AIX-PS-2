@@ -129,7 +129,7 @@ $Log: enable.c,v $
  */
 void gl_enable( GLenum cap, GLboolean state )
 {
-   GLuint i, p;
+   GLuint p;
 
    if (INSIDE_BEGIN_END) {
       if (state) {

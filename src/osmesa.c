@@ -558,7 +558,6 @@ static line_func choose_line_function( void )
 /**********************************************************************/
 
 static GLint lx[MAX_HEIGHT], rx[MAX_HEIGHT];	/* X bounds */
-static GLfixed lz[MAX_HEIGHT], rz[MAX_HEIGHT];	/* Z values */
 static GLfixed lr[MAX_HEIGHT], rr[MAX_HEIGHT];	/* Red */
 static GLfixed lg[MAX_HEIGHT], rg[MAX_HEIGHT];	/* Green */
 static GLfixed lb[MAX_HEIGHT], rb[MAX_HEIGHT];	/* Blue */

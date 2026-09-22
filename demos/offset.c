@@ -78,14 +78,29 @@ static void error(const char* prog, const char* msg);
 static void cubes(int mx, int my, int mode);
 static void fill(Quad quad);
 static void outline(Quad quad);
-static void draw_hidden(Quad quad, int mode);
+static void draw_hidden(Quad quad, int mode, int face_index);
 static void process_input(Display *dpy, Window win);
 static int query_extension(char* extName);
 
-static int attributeList[] = { GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1,
+static int attributeListRGB[] = { GLX_RGBA, GLX_RED_SIZE, 1, GLX_GREEN_SIZE, 1,
     GLX_BLUE_SIZE, 1, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 1, None };
 
+static int attributeListCI[] = { GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 1, None };
+
 static int dimension = 3;
+static int use_rgb = 0;
+static unsigned long c_black = 0, c_white = 1;
+static unsigned long c_red, c_green, c_blue, c_yellow, c_cyan, c_magenta;
+
+static unsigned long alloc_color(Display *dpy, Colormap cmap, int r, int g, int b) {
+    XColor xc;
+    xc.red = r * 65535;
+    xc.green = g * 65535;
+    xc.blue = b * 65535;
+    xc.flags = DoRed | DoGreen | DoBlue;
+    XAllocColor(dpy, cmap, &xc);
+    return xc.pixel;
+}
 
 main(int argc, char** argv) {
     Display *dpy;
@@ -93,17 +108,37 @@ main(int argc, char** argv) {
     XSetWindowAttributes swa;
     Window win;
     GLXContext cx;
+    int i;
+
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-rgb") == 0) {
+            use_rgb = 1;
+        }
+    }
 
     dpy = XOpenDisplay(0);
     if (!dpy) error(argv[0], "can't open display");
 
-    vi = glXChooseVisual(dpy, DefaultScreen(dpy), attributeList);
+    vi = glXChooseVisual(dpy, DefaultScreen(dpy), use_rgb ? attributeListRGB : attributeListCI);
     if (!vi) error(argv[0], "no suitable visual");
 
     cx = glXCreateContext(dpy, vi, 0, GL_TRUE);
 
-    swa.colormap = XCreateColormap(dpy, RootWindow(dpy, vi->screen),
-                                   vi->visual, AllocNone);
+    if (vi->visualid == XVisualIDFromVisual(DefaultVisual(dpy, DefaultScreen(dpy)))) {
+        swa.colormap = DefaultColormap(dpy, DefaultScreen(dpy));
+    } else {
+        swa.colormap = XCreateColormap(dpy, RootWindow(dpy, vi->screen), vi->visual, AllocNone);
+    }
+
+    /* Allocate our colors for Color Index mode */
+    c_black   = alloc_color(dpy, swa.colormap, 0, 0, 0);
+    c_white   = alloc_color(dpy, swa.colormap, 1, 1, 1);
+    c_red     = alloc_color(dpy, swa.colormap, 1, 0, 0);
+    c_green   = alloc_color(dpy, swa.colormap, 0, 1, 0);
+    c_blue    = alloc_color(dpy, swa.colormap, 0, 0, 1);
+    c_yellow  = alloc_color(dpy, swa.colormap, 1, 1, 0);
+    c_cyan    = alloc_color(dpy, swa.colormap, 0, 1, 1);
+    c_magenta = alloc_color(dpy, swa.colormap, 1, 0, 1);
 
     swa.border_pixel = 0;
     swa.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask |
@@ -116,26 +151,33 @@ main(int argc, char** argv) {
 
     glXMakeCurrent(dpy, win, cx);
 
-    /* check for the polygon offset extension */
     if (!query_extension("GL_EXT_polygon_offset"))
         error(argv[0], "polygon_offset extension is not available");
 
-    /* set up viewing parameters */
     glMatrixMode(GL_PROJECTION);
-    gluPerspective(20, 1, 0.1, 20);
+    gluPerspective(20.0, 1.0, 0.1, 20.0);
     glMatrixMode(GL_MODELVIEW);
-    glTranslatef(0, 0, -15);
+    glTranslatef(0.0, 0.0, -15.0);
 
-    /* set other relevant state information */
     glEnable(GL_DEPTH_TEST);
-    glPolygonOffsetEXT(1.5, 0.000001);
+    
+    /* 
+     * Kept the aggressive 5.0 factor and 0.001 bias here because the resulting 
+     * "x-ray" effect (pushing the polygons so far back that interior wireframes bleed through)
+     * looks really cool!
+     */
+    glPolygonOffsetEXT(5.0, 0.001);
 
-    /* process events until the user presses ESC */
+    if (!use_rgb) {
+        glClearIndex((GLfloat)c_black);
+    } else {
+        glClearColor(0.0, 0.0, 0.0, 0.0);
+    }
+
     while (1) process_input(dpy, win);
 }
 
-static void
-draw_scene(int mx, int my) {
+static void draw_scene(int mx, int my) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glPushMatrix();
@@ -155,62 +197,66 @@ draw_scene(int mx, int my) {
     glPopMatrix();
 }
 
-
-static void
-cubes(int mx, int my, int mode) {
+static void cubes(int mx, int my, int mode) {
     int x, y, z, i;
-
-    /* track the mouse */
-    glRotatef(mx / 2.0, 0, 1, 0);
-    glRotatef(my / 2.0, 1, 0, 0);
-
-    /* draw the lines as hidden polygons */
+    glRotatef(mx / 2.0, 0.0, 1.0, 0.0);
+    glRotatef(my / 2.0, 1.0, 0.0, 0.0);
     glTranslatef(-0.5, -0.5, -0.5);
     glScalef(1.0/dimension, 1.0/dimension, 1.0/dimension);
     for (z = 0; z < dimension; z++) {
 	for (y = 0; y < dimension; y++) {
 	    for (x = 0; x < dimension; x++) {
 		glPushMatrix();
-		glTranslatef(x, y, z);
+		glTranslatef((GLfloat)x, (GLfloat)y, (GLfloat)z);
 		glScalef(0.8, 0.8, 0.8);
 		for (i = 0; i < MAXQUAD; i++)
-		    draw_hidden(quads[i], mode);
+		    draw_hidden(quads[i], mode, i);
 		glPopMatrix();
 	    }
 	}
     }
 }
 
-static void
-fill(Quad quad) {
-    /* draw a filled polygon */
+static void fill(Quad quad) {
     glBegin(GL_QUADS);
-    glVertex3fv(quad[0]);
-    glVertex3fv(quad[1]);
-    glVertex3fv(quad[2]);
-    glVertex3fv(quad[3]);
+    glVertex3fv(quad[0]); glVertex3fv(quad[1]);
+    glVertex3fv(quad[2]); glVertex3fv(quad[3]);
     glEnd();
 }
 
-static void
-outline(Quad quad) {
-    /* draw an outlined polygon */
+static void outline(Quad quad) {
     glBegin(GL_LINE_LOOP);
-    glVertex3fv(quad[0]);
-    glVertex3fv(quad[1]);
-    glVertex3fv(quad[2]);
-    glVertex3fv(quad[3]);
+    glVertex3fv(quad[0]); glVertex3fv(quad[1]);
+    glVertex3fv(quad[2]); glVertex3fv(quad[3]);
     glEnd();
 }
 
-static void
-draw_hidden(Quad quad, int mode) {
-    /* draw the outline using white, optionally fill the interior with black */
-    glColor3f(1, 1, 1);
+static void draw_hidden(Quad quad, int mode, int face_index) {
+    if (use_rgb) glColor3f(1.0, 1.0, 1.0);
+    else glIndexi(c_white);
+    
     outline(quad);
 
     if (mode == HIDDEN_LINE) {
-	glColor3f(0, 0, 0);
+        if (use_rgb) {
+            switch(face_index) {
+                case 0: glColor3f(1.0, 0.0, 0.0); break; /* Red */
+                case 1: glColor3f(0.0, 1.0, 0.0); break; /* Green */
+                case 2: glColor3f(0.0, 0.0, 1.0); break; /* Blue */
+                case 3: glColor3f(1.0, 1.0, 0.0); break; /* Yellow */
+                case 4: glColor3f(0.0, 1.0, 1.0); break; /* Cyan */
+                case 5: glColor3f(1.0, 0.0, 1.0); break; /* Magenta */
+            }
+        } else {
+            switch(face_index) {
+                case 0: glIndexi(c_red); break;
+                case 1: glIndexi(c_green); break;
+                case 2: glIndexi(c_blue); break;
+                case 3: glIndexi(c_yellow); break;
+                case 4: glIndexi(c_cyan); break;
+                case 5: glIndexi(c_magenta); break;
+            }
+        }
 	fill(quad);
     }
 }

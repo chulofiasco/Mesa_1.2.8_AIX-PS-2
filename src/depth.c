@@ -816,15 +816,22 @@ void gl_read_depth_span_int( GLuint n, GLint x, GLint y, GLdepth depth[] )
  */
 void gl_alloc_depth_buffer( void )
 {
+   GLint w, h;
+
    /* deallocate current depth buffer if present */
    if (CC.DepthBuffer) {
       free(CC.DepthBuffer);
       CC.DepthBuffer = NULL;
    }
 
+   w = CC.BufferWidth;
+   h = CC.BufferHeight;
+   if (w <= 0 || h <= 0) return;
+   if (w > MAX_WIDTH) w = MAX_WIDTH;
+   if (h > MAX_HEIGHT) h = MAX_HEIGHT;
+
    /* allocate new depth buffer */
-   CC.DepthBuffer = (GLdepth *)
-		malloc( CC.BufferWidth * CC.BufferHeight * sizeof(GLdepth) );
+   CC.DepthBuffer = (GLdepth *) malloc( w * h * sizeof(GLdepth) );
    if (!CC.DepthBuffer) {
       /* out of memory */
       CC.Depth.Test = GL_FALSE;

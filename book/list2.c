@@ -85,7 +85,8 @@ void display(void)
 	glCallList (listName);
     glPopMatrix ();
     drawLine ();
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -107,7 +108,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 400, 50);
     auxInitWindow (argv[0]);
     myinit();

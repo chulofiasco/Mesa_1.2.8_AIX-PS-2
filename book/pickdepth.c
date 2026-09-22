@@ -91,7 +91,7 @@ void drawRects(GLenum mode)
  */
 void processHits (GLint hits, GLuint buffer[])
 {
-    unsigned int i, j;
+    volatile unsigned long i, j;
     GLuint names, *ptr;
 
     printf ("hits = %d\n", hits);
@@ -141,7 +141,8 @@ void pickRects(AUX_EVENTREC *event)
     glOrtho (0.0, 8.0, 0.0, 8.0, -0.5, 2.5);
     drawRects (GL_SELECT);
     glPopMatrix ();
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 
     hits = glRenderMode (GL_RENDER);
     processHits (hits, selectBuf);
@@ -151,7 +152,8 @@ void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawRects (GL_RENDER);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -170,7 +172,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 100, 100);
     auxInitWindow (argv[0]);
     myinit ();

@@ -45,20 +45,31 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdlib.h>
+#include <string.h>
 #include "glaux.h"
+
+static int use_rgb = 0;
 
 /*  Initialize material property, light source, and lighting model.
  */
 void myinit(void)
 {
-    GLint i;
+    volatile long i;
 
     GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
     GLfloat mat_colormap[] = { 16.0, 48.0, 79.0 };
     GLfloat mat_shininess[] = { 10.0 };
     
-    glMaterialfv(GL_FRONT, GL_COLOR_INDEXES, mat_colormap);
-    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    if (use_rgb) {
+        GLfloat mat_diffuse[] = { 1.0, 0.0, 1.0, 1.0 };
+        GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    } else {
+        glMaterialfv(GL_FRONT, GL_COLOR_INDEXES, mat_colormap);
+        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    }
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     glEnable(GL_LIGHTING);
@@ -67,11 +78,15 @@ void myinit(void)
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
 
-    for (i = 0; i < 32; i++) {
-	auxSetOneColor (16 + i, 1.0 * (i/32.0), 0.0, 1.0 * (i/32.0));
-	auxSetOneColor (48 + i, 1.0, 1.0 * (i/32.0), 1.0);
+    if (use_rgb) {
+        glClearColor(0.0, 0.0, 0.0, 1.0);
+    } else {
+        for (i = 0; i < 32; i++) {
+            auxSetOneColor (16 + i, 1.0 * (i/32.0), 0.0, 1.0 * (i/32.0));
+            auxSetOneColor (48 + i, 1.0, 1.0 * (i/32.0), 1.0);
+        }
+        glClearIndex(0);
     }
-    glClearIndex(0);
 }
 
 void display(void)
@@ -79,6 +94,7 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     auxSolidSphere(1.0);
     glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -102,10 +118,17 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_INDEX | AUX_DEPTH);
+    int i;
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-rgb") == 0) {
+            use_rgb = 1;
+        }
+    }
+    auxInitDisplayMode (AUX_DOUBLE | (use_rgb ? AUX_RGB : AUX_INDEX) | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();
     auxReshapeFunc (myReshape);
     auxMainLoop(display);
+    return 0;
 }

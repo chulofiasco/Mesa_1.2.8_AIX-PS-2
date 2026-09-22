@@ -22,7 +22,7 @@
 
 INCDIR = ../include
 
-GL_LIBS = -L../lib -lMesaaux -lMesatk -lMesaGLU -lMesaGL -lm $(XLIBS)
+GL_LIBS = -L../lib -lMesaaux -lMesatk -lMesaGLU -lMesaGL -lm -lXext -lX11 $(XLIBS)
 
 LIB_DEP = ../lib/$(GL_LIB) ../lib/$(GLU_LIB) ../lib/$(TK_LIB) ../lib/$(AUX_LIB)
 
@@ -37,7 +37,7 @@ PROGS = robot accanti accnot accpersp accum aim alpha alpha3D \
 	picksquare plane planet planetup polys \
 	robot sccolorlight scene scenebamb sceneflat \
 	select simple smooth sphere stencil stroke \
-	surface tea teaambient teapots texgen texturesurf xfont
+	surface tea teaambient teapots texgen texturesurf trim xfont
 
 
 

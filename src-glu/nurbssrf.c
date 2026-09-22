@@ -91,7 +91,9 @@ test_nurbs_surface(GLUnurbsObj *nobj, surface_attribs *attrib)
 		call_user_error(nobj,GLU_INVALID_VALUE);
 		return GLU_ERROR;
 	}
+	tmp_int = 30;
 	glGetIntegerv(GL_MAX_EVAL_ORDER,&tmp_int);
+	if (tmp_int < 2) tmp_int = 30;
 	if(attrib->sorder > tmp_int || attrib->sorder < 2)
 	{
 		call_user_error(nobj,GLU_NURBS_ERROR1);
@@ -145,15 +147,15 @@ test_nurbs_surfaces(GLUnurbsObj *nobj)
 		return GLU_ERROR;
 	/* now test the attributive data */
 	/* color */
-	if(nobj->surface.color.type!=GLU_INVALID_ENUM)
+	if((nobj->surface.color.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 		if(test_nurbs_surface(nobj,&(nobj->surface.color))!=GLU_NO_ERROR)
 			return GLU_ERROR;
 	/* normal */
-	if(nobj->surface.normal.type!=GLU_INVALID_ENUM)
+	if((nobj->surface.normal.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 		if(test_nurbs_surface(nobj,&(nobj->surface.normal))!=GLU_NO_ERROR)
 			return GLU_ERROR;
 	/* texture */
-	if(nobj->surface.texture.type!=GLU_INVALID_ENUM)
+	if((nobj->surface.texture.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 		if(test_nurbs_surface(nobj,&(nobj->surface.texture))!=GLU_NO_ERROR)
 			return GLU_ERROR;
 	return GLU_NO_ERROR;
@@ -377,7 +379,7 @@ fill_knot_structures(GLUnurbsObj *nobj,
 	else
 		geom_t_knot->open_at_end=GL_FALSE;
 
-	if(nobj->surface.color.type!=GLU_INVALID_ENUM)
+	if((nobj->surface.color.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 	{
 		color_s_knot->unified_knot=(GLfloat *)1;
 		knot=color_s_knot->knot=nobj->surface.color.sknot;
@@ -438,7 +440,7 @@ fill_knot_structures(GLUnurbsObj *nobj,
 		color_t_knot->unified_knot=NULL;
 	}
 
-	if(nobj->surface.normal.type!=GLU_INVALID_ENUM)
+	if((nobj->surface.normal.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 	{
 		normal_s_knot->unified_knot=(GLfloat *)1;
 		knot=normal_s_knot->knot=nobj->surface.normal.sknot;
@@ -499,7 +501,7 @@ fill_knot_structures(GLUnurbsObj *nobj,
 		normal_t_knot->unified_knot=NULL;
 	}
 
-	if(nobj->surface.texture.type!=GLU_INVALID_ENUM)
+	if((nobj->surface.texture.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 	{
 		texture_s_knot->unified_knot=(GLfloat *)1;
 		knot=texture_s_knot->knot=nobj->surface.texture.sknot;
@@ -693,38 +695,39 @@ tesselate_strip_t_line(GLint top_start,GLint top_end,GLint top_z,
 	GLint bottom_start,GLint bottom_end,GLint bottom_z,GLint bottom_domain)
 {
 	GLint top_cnt,bottom_cnt,tri_cnt,k;
-	GLint direction;
+	GLint direction, bottom_dir;
 
 	top_cnt=top_end-top_start;
 	direction= (top_cnt>=0 ? 1: -1);
 	bottom_cnt=bottom_end-bottom_start;
+	bottom_dir= (bottom_cnt>=0 ? 1: -1);
 	glBegin(GL_LINES);
 	while(top_cnt)
 	{
 		if(bottom_cnt)
-			tri_cnt=top_cnt/bottom_cnt;
+			tri_cnt=abs(top_cnt)/abs(bottom_cnt);
 		else
 			tri_cnt=abs(top_cnt);
 		for(k=0;k<=tri_cnt;k++ , top_start+=direction)
 		{
-			glEvalCoord2f((GLfloat)bottom_z/bottom_domain,
-				(GLfloat)bottom_start/bottom_domain);
+			glEvalCoord2f(bottom_domain == 0 ? 0.0 : (GLfloat)bottom_z/bottom_domain,
+				bottom_domain == 0 ? 0.0 : (GLfloat)bottom_start/bottom_domain);
 			glEvalPoint2(top_z,top_start);
 		}
 		if(bottom_cnt)
 		{
-			glEvalCoord2f((GLfloat)bottom_z/bottom_domain,
-				(GLfloat)bottom_start/bottom_domain);
-			bottom_start+=direction;
+			glEvalCoord2f(bottom_domain == 0 ? 0.0 : (GLfloat)bottom_z/bottom_domain,
+				bottom_domain == 0 ? 0.0 : (GLfloat)bottom_start/bottom_domain);
+			bottom_start+=bottom_dir;
 			top_start-=direction;
-			glEvalCoord2f((GLfloat)bottom_z/bottom_domain,
-				(GLfloat)bottom_start/bottom_domain);
-			glEvalCoord2f((GLfloat)bottom_z/bottom_domain,
-				(GLfloat)bottom_start/bottom_domain);
+			glEvalCoord2f(bottom_domain == 0 ? 0.0 : (GLfloat)bottom_z/bottom_domain,
+				bottom_domain == 0 ? 0.0 : (GLfloat)bottom_start/bottom_domain);
+			glEvalCoord2f(bottom_domain == 0 ? 0.0 : (GLfloat)bottom_z/bottom_domain,
+				bottom_domain == 0 ? 0.0 : (GLfloat)bottom_start/bottom_domain);
 			glEvalPoint2(top_z,top_start);
 		}
 		top_cnt-=direction*tri_cnt;
-		bottom_cnt-=direction;
+		bottom_cnt-=bottom_dir;
 	}
 	glEnd();
 }
@@ -734,32 +737,33 @@ tesselate_strip_t_fill(GLint top_start,GLint top_end,GLint top_z,
 	GLint bottom_start,GLint bottom_end,GLint bottom_z,GLint bottom_domain)
 {
 	GLint top_cnt,bottom_cnt,tri_cnt,k;
-	GLint direction;
+	GLint direction, bottom_dir;
 
 	top_cnt=top_end-top_start;
 	direction= (top_cnt>=0 ? 1: -1);
 	bottom_cnt=bottom_end-bottom_start;
+	bottom_dir= (bottom_cnt>=0 ? 1: -1);
 	while(top_cnt)
 	{
 		if(bottom_cnt)
-			tri_cnt=top_cnt/bottom_cnt;
+			tri_cnt=abs(top_cnt)/abs(bottom_cnt);
 		else
 			tri_cnt=abs(top_cnt);
 		glBegin(GL_TRIANGLE_FAN);
-		glEvalCoord2f((GLfloat)bottom_z/bottom_domain,
-			(GLfloat)bottom_start/bottom_domain);
+		glEvalCoord2f(bottom_domain == 0 ? 0.0 : (GLfloat)bottom_z/bottom_domain,
+			bottom_domain == 0 ? 0.0 : (GLfloat)bottom_start/bottom_domain);
 		for(k=0;k<=tri_cnt;k++ , top_start+=direction)
 			glEvalPoint2(top_z,top_start);
 		if(bottom_cnt)
 		{
-			bottom_start+=direction;
+			bottom_start+=bottom_dir;
 			top_start-=direction;
-			glEvalCoord2f((GLfloat)bottom_z/bottom_domain,
-				(GLfloat)bottom_start/bottom_domain);
+			glEvalCoord2f(bottom_domain == 0 ? 0.0 : (GLfloat)bottom_z/bottom_domain,
+				bottom_domain == 0 ? 0.0 : (GLfloat)bottom_start/bottom_domain);
 		}
 		glEnd();
 		top_cnt-=direction*tri_cnt;
-		bottom_cnt-=direction;
+		bottom_cnt-=bottom_dir;
 	}
 }
 
@@ -782,32 +786,33 @@ tesselate_strip_s_fill(GLint top_start, GLint top_end, GLint top_z,
 	GLint bottom_start, GLint bottom_end, GLint bottom_z, GLfloat bottom_domain)
 {
 	GLint top_cnt,bottom_cnt,tri_cnt,k;
-	GLint direction;
+	GLint direction, bottom_dir;
 
 	top_cnt=top_end-top_start;
 	direction= (top_cnt>=0 ? 1: -1);
 	bottom_cnt=bottom_end-bottom_start;
+	bottom_dir= (bottom_cnt>=0 ? 1: -1);
 	while(top_cnt)
 	{
 		if(bottom_cnt)
-			tri_cnt=top_cnt/bottom_cnt;
+			tri_cnt=abs(top_cnt)/abs(bottom_cnt);
 		else
 			tri_cnt=abs(top_cnt);
 		glBegin(GL_TRIANGLE_FAN);
-		glEvalCoord2f((GLfloat)bottom_start/bottom_domain,
-			(GLfloat)bottom_z/bottom_domain);
+		glEvalCoord2f(bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_start/bottom_domain,
+			bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_z/bottom_domain);
 		for(k=0;k<=tri_cnt;k++ , top_start+=direction)
 			glEvalPoint2(top_start,top_z);
 		if(bottom_cnt)
 		{
-			bottom_start+=direction;
+			bottom_start+=bottom_dir;
 			top_start-=direction;
-			glEvalCoord2f((GLfloat)bottom_start/bottom_domain,
-				(GLfloat)bottom_z/bottom_domain);
+			glEvalCoord2f(bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_start/bottom_domain,
+				bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_z/bottom_domain);
 		}
 		glEnd();
 		top_cnt-=direction*tri_cnt;
-		bottom_cnt-=direction;
+		bottom_cnt-=bottom_dir;
 	}
 }
 
@@ -816,38 +821,39 @@ tesselate_strip_s_line(GLint top_start, GLint top_end, GLint top_z,
 	GLint bottom_start, GLint bottom_end, GLint bottom_z, GLfloat bottom_domain)
 {
 	GLint top_cnt,bottom_cnt,tri_cnt,k;
-	GLint direction;
+	GLint direction, bottom_dir;
 
 	top_cnt=top_end-top_start;
 	direction= (top_cnt>=0 ? 1: -1);
 	bottom_cnt=bottom_end-bottom_start;
+	bottom_dir= (bottom_cnt>=0 ? 1: -1);
 	glBegin(GL_LINES);
 	while(top_cnt)
 	{
 		if(bottom_cnt)
-			tri_cnt=top_cnt/bottom_cnt;
+			tri_cnt=abs(top_cnt)/abs(bottom_cnt);
 		else
 			tri_cnt=abs(top_cnt);
 		for(k=0;k<=tri_cnt;k++ , top_start+=direction)
 		{
-			glEvalCoord2f((GLfloat)bottom_start/bottom_domain,
-				(GLfloat)bottom_z/bottom_domain);
+			glEvalCoord2f(bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_start/bottom_domain,
+				bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_z/bottom_domain);
 			glEvalPoint2(top_start,top_z);
 		}
 		if(bottom_cnt)
 		{
-			glEvalCoord2f((GLfloat)bottom_start/bottom_domain,
-				(GLfloat)bottom_z/bottom_domain);
-			bottom_start+=direction;
+			glEvalCoord2f(bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_start/bottom_domain,
+				bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_z/bottom_domain);
+			bottom_start+=bottom_dir;
 			top_start-=direction;
-			glEvalCoord2f((GLfloat)bottom_start/bottom_domain,
-				(GLfloat)bottom_z/bottom_domain);
+			glEvalCoord2f(bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_start/bottom_domain,
+				bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_z/bottom_domain);
 			glEvalPoint2(top_start,top_z);
-			glEvalCoord2f((GLfloat)bottom_start/bottom_domain,
-				(GLfloat)bottom_z/bottom_domain);
+			glEvalCoord2f(bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_start/bottom_domain,
+				bottom_domain == 0.0f ? 0.0f : (GLfloat)bottom_z/bottom_domain);
 		}
 		top_cnt-=direction*tri_cnt;
-		bottom_cnt-=direction;
+		bottom_cnt-=bottom_dir;
 	}
 	glEnd();
 }
@@ -1013,7 +1019,7 @@ nurbs_map_bezier(GLenum display_mode,GLint *sfactors,GLint *tfactors,
 			tesselate_bottom_left_corner(display_mode,(GLfloat)(1.0/left),
 				(GLfloat)(1.0/bottom));
 /*			tesselate_strip_t(display_mode,1,top,1,1,bottom,0,(GLfloat)bottom);*/
-			tesselate_strip_t(display_mode,top,1,1,bottom,1,0,(GLfloat)bottom);
+			tesselate_strip_t(display_mode,(GLint)top,1,1,(GLint)bottom,1,0,(GLint)bottom);
 		}
 		else
 		if(left==right)
@@ -1021,7 +1027,7 @@ nurbs_map_bezier(GLenum display_mode,GLint *sfactors,GLint *tfactors,
 			glMapGrid2f(right, 0.0, 1.0, top, 0.0, 1.0);
 			glEvalMesh2(display_mode,1,right, 0, top);
 /*			tesselate_strip_t(display_mode,0,top,1,0,bottom,0,(GLfloat)bottom);*/
-			tesselate_strip_t(display_mode,top,0,1,bottom,0,0,(GLfloat)bottom);
+			tesselate_strip_t(display_mode,(GLint)top,0,1,(GLint)bottom,0,0,(GLint)bottom);
 		}
 		else
 		{
@@ -1029,13 +1035,11 @@ nurbs_map_bezier(GLenum display_mode,GLint *sfactors,GLint *tfactors,
 			glEvalMesh2(display_mode,1,left, 0, top-1);
 /*			tesselate_strip_t(display_mode,0,top-1,1,0,bottom-1,0,
 				(GLfloat)bottom);*/
-			tesselate_strip_t(display_mode,top-1,0,1,bottom-1,0,0,
-				(GLfloat)bottom);
+			tesselate_strip_t(display_mode,(GLint)(top-1),0,1,(GLint)(bottom-1),0,0,
+				(GLint)bottom);
 			tesselate_bottom_right_corner(display_mode,top-1,bottom-1,
 				(GLfloat)(1.0/right),(GLfloat)(1.0/bottom));
-/*			tesselate_strip_s(display_mode,1,left,top-1,1,right,right,
-				(GLfloat)right);*/
-			tesselate_strip_s(display_mode,left,1,top-1,right,1,right,
+			tesselate_strip_s(display_mode,left-1,0,bottom-1,right-1,0,right,
 				(GLfloat)right);
 		}
 	}
@@ -1045,8 +1049,8 @@ nurbs_map_bezier(GLenum display_mode,GLint *sfactors,GLint *tfactors,
 		if(left<right)
 		{
 			glMapGrid2f(right, 0.0, 1.0, top, 0.0, 1.0);
-			glEvalMesh2(display_mode,0,right, 1, top);
-			tesselate_strip_s(display_mode,0,right,1,0,left,0,(GLfloat)left);
+			glEvalMesh2(display_mode,1,right, 0, top);
+			tesselate_strip_s(display_mode,1,right,1,1,left,0,(GLfloat)left);
 		}
 		else
 		if(left==right)
@@ -1058,8 +1062,6 @@ nurbs_map_bezier(GLenum display_mode,GLint *sfactors,GLint *tfactors,
 		{
 			glMapGrid2f(left, 0.0, 1.0, top, 0.0, 1.0);
 			glEvalMesh2(display_mode,0,left, 0, top-1);
-/*			tesselate_strip_s(display_mode,0,left,top-1,0,right,right,
-				(GLfloat)right);*/
 			tesselate_strip_s(display_mode,left,0,top-1,right,0,right,
 				(GLfloat)right);
 		}
@@ -1074,23 +1076,20 @@ nurbs_map_bezier(GLenum display_mode,GLint *sfactors,GLint *tfactors,
 				(GLfloat)left);
 			tesselate_top_left_corner(display_mode,right-1,left-1,
 				(GLfloat)(1.0/left),(GLfloat)(1.0/top));
-			tesselate_strip_t(display_mode,1,bottom,right-1,1,top,top,
-				(GLfloat)top);
+			tesselate_strip_t(display_mode, 1, (GLint)bottom, (GLint)(right-1), 1, (GLint)top, (GLint)top, (GLint)top);
 		}
 		else
 		if(left==right)
 		{
 			glMapGrid2f(right, 0.0, 1.0, bottom, 0.0, 1.0);
 			glEvalMesh2(display_mode,0,right-1, 0, bottom);
-			tesselate_strip_t(display_mode,0,bottom,right-1,0,top,top,
-				(GLfloat)top);
+			tesselate_strip_t(display_mode, 0, (GLint)bottom, (GLint)(right-1), 0, (GLint)top, (GLint)top, (GLint)top);
 		}
 		else
 		{
 			glMapGrid2f(left, 0.0, 1.0, bottom, 0.0, 1.0);
 			glEvalMesh2(display_mode,0,left-1, 0, bottom-1);
-			tesselate_strip_t(display_mode,0,bottom-1,left-1,0,top-1,top,
-				(GLfloat)top);
+			tesselate_strip_t(display_mode, 0, (GLint)(bottom-1), (GLint)(left-1), 0, (GLint)(top-1), (GLint)top, (GLint)top);
 			tesselate_top_right_corner(display_mode,left-1,bottom-1,right,top,
 				(GLfloat)(1.0/right),(GLfloat)(1.0/top));
 /*			tesselate_strip_s(display_mode,0,left-1,bottom-1,0,right-1,right,
@@ -1109,7 +1108,7 @@ draw_polygon_mode( GLenum display_mode, GLUnurbsObj *nobj,
 	GLsizei				offset;
 	GLint				t_bezier_cnt,s_bezier_cnt;
 	GLboolean			do_color,do_normal,do_texture;
-	GLint				i,j;
+	volatile long			i,j;
 
 	t_bezier_cnt=new_ctrl->t_bezier_cnt;
 	s_bezier_cnt=new_ctrl->s_bezier_cnt;
@@ -1179,6 +1178,7 @@ draw_polygon_mode( GLenum display_mode, GLUnurbsObj *nobj,
 	}
 }
 
+#if 0
 /* draw NURBS surface in OUTLINE POLYGON mode */
 static void
 draw_patch_mode( GLenum display_mode, GLUnurbsObj *nobj,
@@ -1187,7 +1187,7 @@ draw_patch_mode( GLenum display_mode, GLUnurbsObj *nobj,
 	GLsizei				offset;
 	GLint				t_bezier_cnt,s_bezier_cnt;
 	GLboolean			do_color,do_normal,do_texture;
-	GLint				i,j;
+	volatile long			i,j;
 
 	t_bezier_cnt=new_ctrl->t_bezier_cnt;
 	s_bezier_cnt=new_ctrl->s_bezier_cnt;
@@ -1256,6 +1256,7 @@ draw_patch_mode( GLenum display_mode, GLUnurbsObj *nobj,
 		}
 	}
 }
+#endif
 
 void
 init_new_ctrl(new_ctrl_type *p)
@@ -1269,7 +1270,7 @@ GLenum
 augment_new_ctrl(GLUnurbsObj *nobj, new_ctrl_type *p)
 {
 	GLsizei offset_size;
-	GLint	i,j;
+	volatile long	i,j;
 
 	p->s_bezier_cnt=(p->geom_s_pt_cnt)/(nobj->surface.geom.sorder);
 	p->t_bezier_cnt=(p->geom_t_pt_cnt)/(nobj->surface.geom.torder);
@@ -1360,21 +1361,14 @@ do_nurbs_surface( GLUnurbsObj *nobj )
 		free_new_ctrl(&new_ctrl);
 		return;
 	}
-	switch(nobj->display_mode)
+	if ((nobj->display_mode & 0xffff) == (GLU_FILL & 0xffff))
 	{
-		case GLU_FILL:
-/*			if(polygon_trimming(nobj,&new_ctrl,sfactors,tfactors)==GLU_NO_ERROR)*/
-				draw_polygon_mode(GL_FILL,nobj,&new_ctrl,sfactors,tfactors);
-			break;
-		case GLU_OUTLINE_POLYGON:
-			/* TODO - missing trimming handeling */
-/* just for now - no OUTLINE_PATCH mode 
-			draw_patch_mode(GL_LINE,nobj,&new_ctrl,sfactors,tfactors);
-			break; */
-		case GLU_OUTLINE_PATCH:
-/*			if(polygon_trimming(nobj,&new_ctrl,sfactors,tfactors)==GLU_NO_ERROR)*/
-				draw_polygon_mode(GL_LINE,nobj,&new_ctrl,sfactors,tfactors);
-			break;
+		draw_polygon_mode(GL_FILL,nobj,&new_ctrl,sfactors,tfactors);
+	}
+	else if ((nobj->display_mode & 0xffff) == (GLU_OUTLINE_POLYGON & 0xffff) ||
+	         (nobj->display_mode & 0xffff) == (GLU_OUTLINE_PATCH & 0xffff))
+	{
+		draw_polygon_mode(GL_LINE,nobj,&new_ctrl,sfactors,tfactors);
 	}
 	free(sfactors);
 	free(tfactors);

@@ -101,7 +101,7 @@ static GLenum key(int k, GLenum mask)
 
 static void draw( void )
 {
-   GLint i, j;
+   GLint i;
 
    glClear( GL_COLOR_BUFFER_BIT );
 

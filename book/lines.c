@@ -54,7 +54,7 @@ void myinit (void) {
 
 void display(void)
 {
-    int i;
+    volatile long i;
 
     glClear (GL_COLOR_BUFFER_BIT);
 /*  draw all lines in white	*/
@@ -83,15 +83,18 @@ void display(void)
 /*  as part of a single connect line strip			*/
     glLineStipple (1, 0x1C47);
     glBegin (GL_LINE_STRIP);
-    for (i = 0; i < 7; i++)
-	glVertex2f (50.0 + ((GLfloat) i * 50.0), 75.0);
+    for (i = 0; i < 7; i++) {
+        int index = i;
+	glVertex2f (50.0 + ((GLfloat) index * 50.0), 75.0);
+    }
     glEnd ();
 
 /*  in 4th row, 6 independent lines drawn,	*/
 /*  with dash/dot/dash stipple			*/
     for (i = 0; i < 6; i++) {
-	drawOneLine (50.0 + ((GLfloat) i * 50.0), 
-	    50.0, 50.0 + ((GLfloat)(i+1) * 50.0), 50.0);
+        int index = i;
+	drawOneLine (50.0 + ((GLfloat) index * 50.0), 
+	    50.0, 50.0 + ((GLfloat)(index+1) * 50.0), 50.0);
     }
 
 /*  in 5th row, 1 line drawn, with dash/dot/dash stipple	*/
@@ -99,6 +102,7 @@ void display(void)
     glLineStipple (5, 0x1C47);
     drawOneLine (50.0, 25.0, 350.0, 25.0);
     glFlush ();
+    auxSwapBuffers();
 }
 
 /*  Main Loop
@@ -107,9 +111,10 @@ void display(void)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 400, 150);
     auxInitWindow (argv[0]);
     myinit ();
     auxMainLoop(display);
+    return 0;
 }

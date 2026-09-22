@@ -52,9 +52,7 @@ static GLenum Key(int key, GLenum mask)
 
 static void Draw(void)
 {
-    float xscale, yscale;
-    GLfloat x, y;
-    int i;
+    volatile long i;
 
     glDisable(GL_BLEND);
 
@@ -113,7 +111,7 @@ static void Draw(void)
 
 static GLenum Args(int argc, char **argv)
 {
-    GLint i;
+    volatile long i;
 
     doubleBuffer = GL_FALSE;
     directRender = GL_TRUE;

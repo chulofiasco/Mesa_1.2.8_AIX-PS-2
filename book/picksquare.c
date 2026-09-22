@@ -52,7 +52,7 @@ int board[3][3];	/*  amount of color for each square	*/
 /*	Clear color value for every square on the board	    */
 void myinit(void)
 {
-    int i, j;
+    volatile long i, j;
     for (i = 0; i < 3; i++) 
 	for (j = 0; j < 3; j ++)
 	    board[i][j] = 0;
@@ -72,11 +72,13 @@ void drawSquares(GLenum mode)
 	if (mode == GL_SELECT)
 	    glLoadName (i);
 	for (j = 0; j < 3; j ++) {
+            int index_i = i;
+            int index_j = j;
 	    if (mode == GL_SELECT)
 		glPushName (j);
-	    glColor3f ((GLfloat) i/3.0, (GLfloat) j/3.0, 
-		    (GLfloat) board[i][j]/3.0);
-	    glRecti (i, j, i+1, j+1);
+	    glColor3f ((GLfloat) index_i/3.0, (GLfloat) index_j/3.0, 
+		    (GLfloat) board[index_i][index_j]/3.0);
+	    glRecti (index_i, index_j, index_i+1, index_j+1);
 	    if (mode == GL_SELECT)
 		glPopName ();
 	}
@@ -88,8 +90,8 @@ void drawSquares(GLenum mode)
  */
 void processHits (GLint hits, GLuint buffer[])
 {
-    unsigned int i, j;
-    GLuint ii, jj, names, *ptr;
+    volatile unsigned long i, j;
+    GLuint ii = 0, jj = 0, names, *ptr;
 
     printf ("hits = %d\n", hits);
     ptr = (GLuint *) buffer;
@@ -146,7 +148,8 @@ void pickSquares(AUX_EVENTREC *event)
 
     glMatrixMode (GL_PROJECTION);
     glPopMatrix ();
-    glFlush ();
+    glFlush ();
+    auxSwapBuffers();
 
     hits = glRenderMode (GL_RENDER);
     processHits (hits, selectBuf);
@@ -156,7 +159,8 @@ void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
     drawSquares (GL_RENDER);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -175,7 +179,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 100, 100);
     auxInitWindow (argv[0]);
     myinit ();

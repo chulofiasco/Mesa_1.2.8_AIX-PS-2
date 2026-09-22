@@ -1,0 +1,32 @@
+# Standalone AIX PS/2 Makefile for Mesa 1.2.8 libMesaGL.a
+
+CC = cc
+CFLAGS = -Hon=ansi -O -DFBIND=1
+INCDIR = ../include
+LIBDIR = ../lib
+GL_LIB = libMesaGL.a
+
+CORE_SOURCES = accum.c alpha.c alphabuf.c attrib.c bitmap.c blend.c \
+	bresenhm.c clip.c context.c copypix.c dd.c depth.c draw.c \
+	drawpix.c enable.c eval2.c fog.c feedback.c fortran.c get.c \
+	interp.c light.c lines.c list.c logic.c masking.c misc.c osmesa.c \
+	pb.c pixel.c points.c polygons.c readpix.c scissor.c span.c \
+	stencil.c texture.c varray.c vb.c vertex.c winpos.c xform.c
+
+DRIVER_SOURCES = glx.c xfonts.c xmesa1.c xmesa2.c xmesa3.c
+
+SOURCES = $(CORE_SOURCES) $(DRIVER_SOURCES)
+OBJECTS = $(SOURCES:.c=.o)
+
+all aix-ps2 targets: $(LIBDIR)/$(GL_LIB)
+
+.c.o:
+	$(CC) -c -I$(INCDIR) $(CFLAGS) $<
+
+$(LIBDIR)/$(GL_LIB): $(OBJECTS)
+	-mkdir $(LIBDIR) 2>/dev/null || true
+	ar ruv $(GL_LIB) $(OBJECTS)
+	mv $(GL_LIB) $(LIBDIR)/
+
+clean:
+	rm -f *.o $(LIBDIR)/$(GL_LIB)

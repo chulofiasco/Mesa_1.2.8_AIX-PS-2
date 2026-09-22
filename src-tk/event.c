@@ -217,10 +217,26 @@ static GLenum DoNextEvent(void)
 	  case XK_space:	key = TK_SPACE;		break;
 	  case XK_Return: 	key = TK_RETURN;	break;
 	  case XK_Escape: 	key = TK_ESCAPE;	break;
-	  case XK_Left:		key = TK_LEFT;		break;
-	  case XK_Up:		key = TK_UP;		break;
-	  case XK_Right:  	key = TK_RIGHT;		break;
-	  case XK_Down:		key = TK_DOWN;		break;
+	  case XK_Left:
+#ifdef XK_KP_Left
+	  case XK_KP_Left:
+#endif
+		key = TK_LEFT;		break;
+	  case XK_Up:
+#ifdef XK_KP_Up
+	  case XK_KP_Up:
+#endif
+		key = TK_UP;		break;
+	  case XK_Right:
+#ifdef XK_KP_Right
+	  case XK_KP_Right:
+#endif
+		key = TK_RIGHT;		break;
+	  case XK_Down:
+#ifdef XK_KP_Down
+	  case XK_KP_Down:
+#endif
+		key = TK_DOWN;		break;
 	  default: 		key = GL_FALSE;		break;
 	}
 	if (key && KeyDownFunc) {
@@ -272,9 +288,7 @@ void tkExec(void)
  */
 void tkExec(void)
 {
-    GLenum flag;
-
-/*    while  (XPending(xDisplay)) { flag |= DoNextEvent(); }*/
+    GLenum flag = GL_TRUE;
 
     while (GL_TRUE) {
         if (IdleFunc) {

@@ -152,7 +152,8 @@ void display(void)
 	0.7, 0.7, 0.7, .078125);
     renderTeapot (14.0, 2.0, 0.05, 0.05, 0.0, 0.5, 0.5, 0.4, 
 	0.7, 0.7, 0.04, .078125);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -175,7 +176,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 600);
     auxInitWindow (argv[0]);
     myinit();

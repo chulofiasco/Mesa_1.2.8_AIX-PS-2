@@ -12,20 +12,21 @@
 
 int visual_request[] = { None }; /* don't need much of a visual */
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
   char *display_name = NULL;
   char *string;
   Display       *dpy;
   int           screen_num;
-  int           major, minor;
+  int           glx_major, glx_minor;
+#ifndef MESA
   int           dontcare; /* for returned arguments we don't care about */
+#endif
   XVisualInfo   *vis;
   GLXContext    ctx;
   Window        root,  win;
   Colormap      cmap;
   XSetWindowAttributes swa;
-  XEvent        event;
 
   /* parse arguments */
   if(argc > 1)
@@ -41,6 +42,8 @@ main(int argc, char **argv)
     fprintf(stderr,"Error: XOpenDisplay() failed.\n");
     return -1;
   }
+  
+  printf("Display: %s\n", XDisplayName(display_name));
 
   /* does the server know about OpenGL & GLX? */
 #ifndef MESA
@@ -51,8 +54,8 @@ main(int argc, char **argv)
 #endif
 
   /* find the glx version */
-  if(glXQueryVersion(dpy, &major, &minor))
-    printf("GLX Version: %d.%d\n", major, minor);
+  if(glXQueryVersion(dpy, &glx_major, &glx_minor))
+    printf("GLX Version: %d.%d\n", glx_major, glx_minor);
   else {
     fprintf(stderr, "Error: glXQueryVersion() failed.\n");
     return -1;
@@ -79,7 +82,7 @@ main(int argc, char **argv)
   ** This test guarantees that glx, on the display you are inquiring,
   ** suppports glXQueryExtensionsString().
   */
-  if(minor > 0 || major > 1)
+  if(glx_minor > 0 || glx_major > 1)
     string = (char *) glXQueryExtensionsString(dpy, screen_num);
   else
     string = "";
@@ -92,7 +95,7 @@ main(int argc, char **argv)
     return -1;
   }
 
-  if (minor>0 || major>1) {
+  if (glx_minor>0 || glx_major>1) {
      printf("glXGetClientString(GLX_VENDOR): %s\n", glXGetClientString(dpy,GLX_VENDOR));
      printf("glXGetClientString(GLX_VERSION): %s\n", glXGetClientString(dpy,GLX_VERSION));
      printf("glXGetClientString(GLX_EXTENSIONS): %s\n", glXGetClientString(dpy,GLX_EXTENSIONS));
@@ -163,37 +166,26 @@ main(int argc, char **argv)
 ** to get glu info, even if you run on a GLU 1.1 or latter machine,
 ** since the code has been #ifdef'ed out.
 */
-#ifdef GLU_VERSION_1_1
-
   /*
-  ** If the glx version is 1.1 or latter, gluGetString() is guaranteed
-  ** to exist.
+  ** Query GLU Version and Extensions
   */
-  if(minor > 0 || major > 1)
+  if(glx_minor > 0 || glx_major > 1)
     string = (char *) gluGetString(GLU_VERSION);
   else
     string = "1.0";
 
   if(string)
     printf("GLU Version: %s\n", string);
-  else {
-    fprintf(stderr, "Error: gluGetString(GLU_VERSION) failed.\n");
-    return -1;
-  }
-  
-  if(minor > 0 || major > 1)
+  else
+    printf("GLU Version: 1.0\n");
+
+  if(glx_minor > 0 || glx_major > 1)
     string = (char *) gluGetString(GLU_EXTENSIONS);
   else
     string = "";
 
   if(string)
     printf("GLU Extensions: %s\n", string);
-  else {
-    fprintf(stderr, "Error: gluGetString(GLU_EXTENSIONS) failed.\n");
-    return -1;
-  }
 
-
-#endif
-
+  return 0;
 }

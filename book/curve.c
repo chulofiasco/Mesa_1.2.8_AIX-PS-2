@@ -60,9 +60,9 @@ void myinit(void)
 
 void display(void)
 {
-    GLfloat ctlpoints[4][3] = {{-.75, -.75, 0.0}, 
+    static GLfloat ctlpoints[4][3] = {{-.75, -.75, 0.0}, 
 	{-.5, .75, 0.0}, {.5, .75, 0.0}, {.75, -.75, 0.0}};
-    GLfloat knots[8] = {0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0}; 
+    static GLfloat knots[8] = {0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0}; 
 
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f (1.0, 1.0, 1.0);
@@ -74,7 +74,8 @@ void display(void)
 	    4,
 	    GL_MAP1_VERTEX_3);
     gluEndCurve(theNurb);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -96,7 +97,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();

@@ -21,6 +21,9 @@
 
 # $Id: Makefile,v 1.32 1996/05/22 17:51:04 brianp Exp $
 
+# Optional Fortran bindings (use FBIND_FLAGS="" to disable)
+FBIND_FLAGS = -DFBIND=1
+
 # $Log: Makefile,v $
 # Revision 1.32  1996/05/22  17:51:04  brianp
 # added nt/ directory to tar files
@@ -133,6 +136,7 @@ default:
 	@echo "Type one of the following:"
 	@echo "  make aix                  for IBM RS/6000 with AIX"
 	@echo "  make aix-sl               for IBM RS/6000, make shared libs"
+	@echo "  make aix-ps2              for IBM PS/2 with AIX PS/2 1.3 (MetaWare High C)"
 	@echo "  make amiga                for Amigas"
 	@echo "  make amiwin               for Amiga with SAS/C and AmiWin"
 	@echo "  make amix                 for Amiga 3000 UX  SVR4 v2.1 systems"
@@ -179,10 +183,16 @@ default:
 	@echo "  make unixware             for PCs running UnixWare"
 	@echo "  make vistra               for Stardent Vistra systems"
 	@echo "  make clean"
+	@echo "  make install              install base headers and libraries"
+	@echo "  make install-demos        install demo binaries to /usr/local/mesa-1.2.8/demos"
+	@echo "  make install-samples      install sample binaries to /usr/local/mesa-1.2.8/samples"
+	@echo "  make install-book         install book binaries to /usr/local/mesa-1.2.8/book"
+	@echo "  make remove-extras        remove installed demos, samples, and book directories"
+	@echo "  make uninstall            uninstall all Mesa files and symlinks"
 
 
 
-aix aix-sl amix bsdos debug dgux freebsd gcc hpux hpux-gcc hpux-sl irix4 irix5 irix5-dso irix6-32 irix6-n32 irix6-64 linux linux-elf machten-2.2 machten-4.0 netbsd next-x11 osf1 qnx sco solaris-x86 solaris-x86-gcc sunos4 sunos4-sl sunos4-gcc sunos4-gcc-sl sunos5 sunos5-sl sunos5-gcc sunos5-gcc-sl sunos5-x11r6-gcc-sl ultrix-gcc unicos unixware vistra:
+aix aix-sl aix-ps2 amix bsdos debug dgux freebsd gcc hpux hpux-gcc hpux-sl irix4 irix5 irix5-dso irix6-32 irix6-n32 irix6-64 linux linux-elf machten-2.2 machten-4.0 netbsd next-x11 osf1 qnx sco solaris-x86 solaris-x86-gcc sunos4 sunos4-sl sunos4-gcc sunos4-gcc-sl sunos5 sunos5-sl sunos5-gcc sunos5-gcc-sl sunos5-x11r6-gcc-sl ultrix-gcc unicos unixware vistra:
 	-mkdir lib
 	touch src/depend
 	touch src-glu/depend
@@ -232,26 +242,92 @@ next:
 
 # Remove .o files, emacs backup files, etc.
 clean:
-	-rm -f include/*~
-	-rm -f include/GL/*~
-	-rm -f src/*.o src/*~ src/*.a
-	-rm -f src-aux/*.o src-aux/*~ src-aux/*.a
-	-rm -f src-glu/*.o src-glu/*~ src-glu/*.a
-	-rm -f src-tk/*.o src-tk/*~ src-tk/*.a
-	-rm -f src-tk2/*.o src-tk2/*~ src-tk2/*.a
-	-rm -f book/*.o book/*~
-	-rm -f demos/*.o demos/*~
-	-rm -f samples/*.o samples/*~
-	-rm -f mondello/*.o mondello/*~ mondello/*.a
+	-rm -f -f include/*~
+	-rm -f -f include/GL/*~
+	-rm -f -f src/*.o src/*~ src/*.a
+	-rm -f -f src-aux/*.o src-aux/*~ src-aux/*.a
+	-rm -f -f src-glu/*.o src-glu/*~ src-glu/*.a
+	-rm -f -f src-tk/*.o src-tk/*~ src-tk/*.a
+	-rm -f -f src-tk2/*.o src-tk2/*~ src-tk2/*.a
+	-rm -f -f book/*.o book/*~
+	-rm -f -f demos/*.o demos/*~
+	-rm -f -f samples/*.o samples/*~
+	-rm -f -f mondello/*.o mondello/*~ mondello/*.a
 
 # Remove everthing that can be remade
 realclean: clean
-	-rm -f lib/*.a lib/*.so*
+	-rm -f -f lib/*.a lib/*.so*
 	cd book ; $(MAKE) realclean
 	cd demos ; $(MAKE) realclean
 	cd samples ; $(MAKE) realclean
 	cd mondello; $(MAKE) realclean
-	-rm -f lib/*.a lib/*.so*
+	-rm -f -f lib/*.a lib/*.so*
+
+PREFIX = /usr/local/Mesa-1.2.8
+
+install:
+	@if [ ! -d /usr/local ]; then mkdir /usr/local; fi
+	@if [ ! -d /usr/local/include ]; then mkdir /usr/local/include; fi
+	@if [ ! -d /usr/local/include/GL ]; then mkdir /usr/local/include/GL; fi
+	@if [ ! -d /usr/local/lib ]; then mkdir /usr/local/lib; fi
+	cp include/GL/*.h /usr/local/include/GL/
+	@if [ -f include/glaux.h ]; then cp include/glaux.h /usr/local/include/; fi
+	@if [ -f include/gltk.h ]; then cp include/gltk.h /usr/local/include/; fi
+	cp lib/*.a /usr/local/lib/
+	@for lib in libMesaGL.a libMesaGLU.a libMesatk.a libMesaaux.a; do \
+		if [ -f /usr/local/lib/$$lib ] && [ ! -f /lib/$$lib ] && [ ! -h /lib/$$lib ]; then \
+			ln -s /usr/local/lib/$$lib /lib/$$lib; \
+		fi; \
+	done
+
+install-plus: install
+	cd tools ; $(MAKE)
+	@if [ ! -d /usr/local ]; then mkdir /usr/local; fi
+	@if [ ! -d /usr/local/bin ]; then mkdir /usr/local/bin; fi
+	@if [ ! -d /usr/local/info ]; then mkdir /usr/local/info; fi
+	cp samples/oglinfo /usr/local/bin/
+	cp tools/mesatest tools/ostest tools/test_gallery tools/x11_renderbench /usr/local/bin/
+	cp *.md /usr/local/info/
+
+install-demos:
+	@if [ ! -d /usr/local ]; then mkdir /usr/local; fi
+	@if [ ! -d $(PREFIX) ]; then mkdir $(PREFIX); fi
+	@if [ ! -d $(PREFIX)/demos ]; then mkdir $(PREFIX)/demos; fi
+	@for f in bounce gamma gears glxdemo glxpixmap isosurf offset osdemo shadow spin test0 wave xdemo reflect winpos isosurf.dat PROGRAMS.md; do \
+		if [ -f demos/$$f ]; then cp demos/$$f $(PREFIX)/demos/; fi; \
+	done
+
+install-samples:
+	@if [ ! -d /usr/local ]; then mkdir /usr/local; fi
+	@if [ ! -d $(PREFIX) ]; then mkdir $(PREFIX); fi
+	@if [ ! -d $(PREFIX)/samples ]; then mkdir $(PREFIX)/samples; fi
+	@for f in accum bitmap1 bitmap2 blendeq blendxor copy cursor depth eval fog font line logo nurb oglinfo olympic overlay point prim quad select shape speed sphere star stencil stretch texture tri wave *.rgb PROGRAMS.md; do \
+		if [ -f samples/$$f ]; then cp samples/$$f $(PREFIX)/samples/; fi; \
+	done
+
+install-book:
+	@if [ ! -d /usr/local ]; then mkdir /usr/local; fi
+	@if [ ! -d $(PREFIX) ]; then mkdir $(PREFIX); fi
+	@if [ ! -d $(PREFIX)/book ]; then mkdir $(PREFIX)/book; fi
+	@for f in robot accanti accnot accpersp accum aim alpha alpha3D anti antiindex antipindex antipoint antipoly bezcurve bezmesh bezsurf checker checker2 chess clip colormat cone cube curve depthcue disk dof dofnot double drawf feedback fog fogindex font light linelist lines list list2 maplight material mipmap model movelight nurbs pickdepth pickline picksquare plane planet planetup polys sccolorlight scene scenebamb sceneflat select simple smooth sphere stencil stroke surface tea teaambient teapots texgen texturesurf xfont PROGRAMS.md; do \
+		if [ -f book/$$f ]; then cp book/$$f $(PREFIX)/book/; fi; \
+	done
+
+remove-extras:
+	-rm -f -rf $(PREFIX)/demos
+	-rm -f -rf $(PREFIX)/samples
+	-rm -f -rf $(PREFIX)/book
+	-rmdir $(PREFIX) 2>/dev/null || true
+
+uninstall: remove-extras
+	-rm -f -f /usr/local/include/GL/gl.h /usr/local/include/GL/glu.h /usr/local/include/GL/glx.h /usr/local/include/GL/osmesa.h
+	-rm -f -f /usr/local/include/glaux.h /usr/local/include/gltk.h
+	-rmdir /usr/local/include/GL 2>/dev/null || true
+	-rm -f -f /usr/local/lib/libMesaGL.a /usr/local/lib/libMesaGLU.a /usr/local/lib/libMesatk.a /usr/local/lib/libMesaaux.a
+	-rm -f -f /lib/libMesaGL.a /lib/libMesaGLU.a /lib/libMesatk.a /lib/libMesaaux.a
+
+
+
 
 
 

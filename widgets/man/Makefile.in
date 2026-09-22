@@ -33,6 +33,7 @@ manprefix =
 
 mandir = $(prefix)/man/man3
 
+INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 
 POD2MAN = @POD2MAN@
@@ -52,10 +53,15 @@ HTMLS = $(PODS:.pod=.html)
 all: $(MANS) $(HTMLS)
 
 install: $(MANS)
-	$(INSTALL_DATA) $(MANS) $(mandir)
+	@if [ -f $(mandir) ] && [ ! -d $(mandir) ]; then rm -f $(mandir); fi
+	$(top_srcdir)/install-sh -d $(mandir)
+	@for file in $(MANS); do \
+		echo "$(INSTALL_DATA) $$file $(mandir)"; \
+		$(INSTALL_DATA) $$file $(mandir); \
+	done
 
 uninstall:
-	cd $(mandir) && rm -f $(MANS)
+	if [ -d $(mandir) ]; then cd $(mandir) && rm -f $(MANS); fi
 
 .SUFFIXES:
 .SUFFIXES: .html .3x .pod

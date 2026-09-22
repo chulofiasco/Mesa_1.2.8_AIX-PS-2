@@ -51,7 +51,7 @@ GLubyte checkImage[checkImageWidth][checkImageHeight][3];
 
 void makecheckimage(void)
 {
-    int i, j, r, c;
+    volatile long i, j, c;
     
     for (i = 0; i < checkImageWidth; i++) {
 	for (j = 0; j < checkImageHeight; j++) {
@@ -95,7 +95,8 @@ void display(void)
     glTexCoord2f(3.0, 3.0); glVertex3f(2.41421, 1.0, -1.41421);
     glTexCoord2f(3.0, 0.0); glVertex3f(2.41421, -1.0, -1.41421);
     glEnd();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -111,7 +112,7 @@ void myReshape(int w, int h)
 
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();

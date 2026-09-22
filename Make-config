@@ -193,6 +193,18 @@ aix-sl:
 	"RANLIB = true" \
 	"XLIBS = -lX11"
 
+aix-ps2:
+	$(MAKE) $(MFLAGS) targets \
+	"GL_LIB = libMesaGL.a" \
+	"GLU_LIB = libMesaGLU.a" \
+	"TK_LIB = libMesatk.a" \
+	"AUX_LIB = libMesaaux.a" \
+	"CC = cc" \
+	"CFLAGS = -O -Hon=ansi $(FBIND_FLAGS)" \
+	"MAKELIB = ar ruv" \
+	"RANLIB = true" \
+	"XLIBS = -lXext -lX11 -lm"
+
 # Make-config additions for the Amiga 3000 UX
 # Carlyn Voss Iuzzolino   5/8/95: 
 # Modified gcc part as follows:

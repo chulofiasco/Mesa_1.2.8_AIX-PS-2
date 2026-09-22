@@ -1449,8 +1449,8 @@ void glMap2d( GLenum target,
 
 void glGetMapdv( GLenum target, GLenum query, GLdouble *v )
 {
-   GLuint i, n;
-   GLfloat *data;
+   GLuint i, n=0;
+   GLfloat *data = NULL;
 
    switch (query) {
       case GL_COEFF:
@@ -1709,8 +1709,8 @@ void glGetMapdv( GLenum target, GLenum query, GLdouble *v )
 
 void glGetMapfv( GLenum target, GLenum query, GLfloat *v )
 {
-   GLuint i, n;
-   GLfloat *data;
+   GLuint i, n=0;
+   GLfloat *data = NULL;
 
    switch (query) {
       case GL_COEFF:
@@ -1969,8 +1969,8 @@ void glGetMapfv( GLenum target, GLenum query, GLfloat *v )
 
 void glGetMapiv( GLenum target, GLenum query, GLint *v )
 {
-   GLuint i, n;
-   GLfloat *data;
+   GLuint i, n=0;
+   GLfloat *data = NULL;
 
    switch (query) {
       case GL_COEFF:

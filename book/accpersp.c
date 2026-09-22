@@ -202,7 +202,8 @@ void display(void)
 	glAccum(GL_ACCUM, 1.0/ACSIZE);
     }
     glAccum (GL_RETURN, 1.0);
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -216,7 +217,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB
 			| AUX_ACCUM | AUX_DEPTH);
     auxInitPosition (0, 0, 250, 250);
     auxInitWindow (argv[0]);

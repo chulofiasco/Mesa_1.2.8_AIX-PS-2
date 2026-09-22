@@ -432,7 +432,6 @@ GLuint gl_viewclip_polygon( GLuint n, GLuint vlist[] )
    GLuint vlist2[VB_MAX];
    GLuint n2;
    GLfloat dx, dy, dz, dw, t;
-   GLuint incount, i;
 
    Space = CLIP_SPACE;
 
@@ -840,7 +839,7 @@ GLuint gl_userclip_polygon( GLuint n, GLuint vlist[] )
 {
    GLuint vlist2[VB_MAX];
    GLuint *inlist, *outlist;
-   GLuint incount, outcount;
+   GLuint incount, outcount = 0;
    GLuint curri, currj;
    GLuint previ, prevj;
    GLuint p;

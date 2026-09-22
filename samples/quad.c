@@ -89,8 +89,13 @@ char *texFileName = 0;
 
 static void ErrorHandler(GLenum which)
 {
-
-    fprintf(stderr, "Quad Error: %s\n", gluErrorString(which));
+    /* MetaWare High C 2.2g: GLenum is 16-bit unsigned int on AIX PS/2.
+     * which |= 0x10000 would truncate back to 16-bit; use unsigned long. */
+    unsigned long which32 = (unsigned long)which;
+    if (which32 > 0UL && which32 < 65536UL) {
+        which32 |= 0x10000UL;
+    }
+    fprintf(stderr, "Quad Error: %lu\n", which32);
 }
 
 static void Init(void)

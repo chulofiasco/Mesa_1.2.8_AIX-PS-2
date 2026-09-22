@@ -652,7 +652,7 @@ static void draw_color_pixels( GLsizei width, GLsizei height, GLenum format,
    else {
       /* General solution */
       GLboolean r_flag, g_flag, b_flag, a_flag, l_flag;
-      GLuint components;
+      GLuint components = 0;
 
       r_flag = g_flag = b_flag = a_flag = l_flag = GL_FALSE;
       switch (format) {

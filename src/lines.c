@@ -400,7 +400,7 @@ static void smooth_rgba_line( GLuint v1, GLuint v2, GLuint pv )
    GLint y1 = (GLint) VB.Win[v1][1];
    GLint x2 = (GLint) VB.Win[v2][0];
    GLint y2 = (GLint) VB.Win[v2][1];
-   GLint i, n;
+   GLint n;
 
    /* compute pixel locations */
    n = gl_bresenham( x1, y1, x2, y2, PB.x+PB.count, PB.y+PB.count );

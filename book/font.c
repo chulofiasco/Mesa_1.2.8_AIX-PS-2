@@ -149,13 +149,14 @@ GLuint fontOffset;
 
 void makeRasterFont(void)
 {
-    GLuint i;
+    volatile GLuint i;
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     fontOffset = glGenLists (128);
     for (i = 32; i < 127; i++) {
-	glNewList(i+fontOffset, GL_COMPILE);
-	glBitmap(8, 13, 0.0, 2.0, 10.0, 0.0, rasters[i-32]);
+        GLuint local_i = i;
+	glNewList(local_i+fontOffset, GL_COMPILE);
+	glBitmap(8, 13, 0.0, 2.0, 10.0, 0.0, rasters[local_i-32]);
 	glEndList();
     }
 }
@@ -181,15 +182,17 @@ void printString(char *s)
 void display(void)
 {
     GLfloat white[3] = { 1.0, 1.0, 1.0 };
-    int i, j;
+    volatile long i;
+    long j;
     char teststring[33];
 
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3fv(white);
     for (i = 32; i < 127; i += 32) {
-	glRasterPos2i(20, 200 - 18*i/32);
+        long local_i = i;
+	glRasterPos2i(20, 200 - 18*local_i/32);
 	for (j = 0; j < 32; j++)
-	    teststring[j] = (char) (i+j);
+	    teststring[j] = (char) (local_i+j);
 	teststring[32] = 0;
 	printString(teststring);
     }
@@ -198,6 +201,7 @@ void display(void)
     glRasterPos2i(20, 82);
     printString("over a lazy dog.");
     glFlush ();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -205,7 +209,7 @@ void myReshape(int w, int h)
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho (0.0, w, 0.0, h, -1.0, 1.0);
+    glOrtho (0.0, (GLdouble)w, 0.0, (GLdouble)h, -1.0, 1.0);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -215,12 +219,13 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();
     auxReshapeFunc (myReshape);
     auxMainLoop(display);
+    return 0;
 }
 
 

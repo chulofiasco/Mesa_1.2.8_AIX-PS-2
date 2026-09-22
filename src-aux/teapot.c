@@ -156,14 +156,20 @@ static void wireTeapot(long grid, GLdouble scale)
 void auxSolidTeapot(GLdouble scale)
 {
     if (glIsList(teapots[TEAPOTSOLID]) == 0)
-	solidTeapot (14, scale);
+	solidTeapot (14, 1.0);
+    glPushMatrix();
+    glScalef(scale, scale, scale);
     glCallList(teapots[TEAPOTSOLID]);
+    glPopMatrix();
 }
 
 void auxWireTeapot(GLdouble scale)
 {
     if (glIsList(teapots[TEAPOTWIRE]) == 0)
-	wireTeapot (10, scale);
+	wireTeapot (10, 1.0);
+    glPushMatrix();
+    glScalef(scale, scale, scale);
     glCallList(teapots[TEAPOTWIRE]);
+    glPopMatrix();
 }
 

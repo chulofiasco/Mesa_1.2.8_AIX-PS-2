@@ -42,68 +42,101 @@ struct
 void my_error(GLenum err)
 {
 	int len,i;
-	char const *str;
+	char errbuf[64];
+	const char *errstr;
+	unsigned long err32 = (unsigned long)err;
+	if (err32 > 0UL && err32 < 65536UL) {
+		err32 |= 0x10000UL;
+	}
 
-	glColor3f(0.9,0.9,0.9);
-	glRasterPos2i(5,5);
-	str=gluErrorString(err);
-	len=strlen(str);
-	for(i=0;i<len;i++)
-		glutBitmapCharacter(GLUT_BITMAP_9_BY_15,str[i]);
+	errstr = (const char *)gluErrorString((GLenum)err32);
+	if (errstr != NULL) {
+		sprintf(errbuf, "GLU Error: %s", errstr);
+	} else {
+		switch(err32) {
+			case 100154: errstr = "duplicate vertex"; break;
+			case 100155: errstr = "overlapping contours"; break;
+			case 100156: errstr = "self intersecting contour"; break;
+			case 100157: errstr = "contour orientation mismatch"; break;
+			case 100158: errstr = "contour topology mismatch"; break;
+			case 100159: errstr = "coplanar contour error"; break;
+			default: errstr = "tessellation failed"; break;
+		}
+		sprintf(errbuf, "GLU Error %lu (%s)", err32, errstr);
+	}
+
+	glColor3f(1.0, 0.2, 0.2);
+	glRasterPos2i(10, 20);
+	len = strlen(errbuf);
+	for (i = 0; i < len; i++)
+		glutBitmapCharacter(GLUT_BITMAP_9_BY_15, errbuf[i]);
 }
+
+static GLenum current_tess_mode;
+static GLint tess_verts[200][2];
+static GLfloat tess_colors[200][3];
+static GLfloat current_edge_color[3] = {1.0, 1.0, 0.5};
+static int tess_vert_cnt = 0;
 
 void begin_callback(GLenum mode)
 {
-	triangle.no=0;
+	current_tess_mode = mode;
+	tess_vert_cnt = 0;
 }
 
 void edge_callback(GLenum flag)
 {
-	if(flag==GL_TRUE)
+	if(flag == GL_TRUE)
 	{
-		triangle.color[0]=1.0;
-		triangle.color[1]=1.0;
-		triangle.color[2]=0.5;
+		current_edge_color[0] = 1.0;
+		current_edge_color[1] = 1.0;
+		current_edge_color[2] = 0.5;
 	}
 	else
 	{
-		triangle.color[0]=1.0;
-		triangle.color[1]=0.0;
-		triangle.color[2]=0.0;
+		current_edge_color[0] = 1.0;
+		current_edge_color[1] = 0.0;
+		current_edge_color[2] = 0.0;
+	}
+}
+
+void vertex_callback(void *data)
+{
+	GLint *p = (GLint *)data;
+	if (tess_vert_cnt < 200) {
+		tess_verts[tess_vert_cnt][0] = p[0];
+		tess_verts[tess_vert_cnt][1] = p[1];
+		tess_colors[tess_vert_cnt][0] = current_edge_color[0];
+		tess_colors[tess_vert_cnt][1] = current_edge_color[1];
+		tess_colors[tess_vert_cnt][2] = current_edge_color[2];
+		tess_vert_cnt++;
 	}
 }
 
 void end_callback()
 {
+	int i;
 	glBegin(GL_LINES);
-	glColor3f(triangle.p_color[0][0],triangle.p_color[0][1],
-		triangle.p_color[0][2]);
-	glVertex2i(triangle.p[0][0],triangle.p[0][1]);
-	glVertex2i(triangle.p[1][0],triangle.p[1][1]);
-	glColor3f(triangle.p_color[1][0],triangle.p_color[1][1],
-		triangle.p_color[1][2]);
-	glVertex2i(triangle.p[1][0],triangle.p[1][1]);
-	glVertex2i(triangle.p[2][0],triangle.p[2][1]);
-	glColor3f(triangle.p_color[2][0],triangle.p_color[2][1],
-		triangle.p_color[2][2]);
-	glVertex2i(triangle.p[2][0],triangle.p[2][1]);
-	glVertex2i(triangle.p[0][0],triangle.p[0][1]);
+	if (current_tess_mode == GL_TRIANGLES) {
+		for (i = 0; i + 2 < tess_vert_cnt; i += 3) {
+			glColor3fv(tess_colors[i]);   glVertex2iv(tess_verts[i]);   glVertex2iv(tess_verts[i+1]);
+			glColor3fv(tess_colors[i+1]); glVertex2iv(tess_verts[i+1]); glVertex2iv(tess_verts[i+2]);
+			glColor3fv(tess_colors[i+2]); glVertex2iv(tess_verts[i+2]); glVertex2iv(tess_verts[i]);
+		}
+	} else if (current_tess_mode == GL_TRIANGLE_FAN) {
+		for (i = 1; i + 1 < tess_vert_cnt; i++) {
+			glColor3fv(tess_colors[i]);   glVertex2iv(tess_verts[0]);   glVertex2iv(tess_verts[i]);
+			glColor3fv(tess_colors[i]);   glVertex2iv(tess_verts[i]);   glVertex2iv(tess_verts[i+1]);
+			glColor3fv(tess_colors[i+1]); glVertex2iv(tess_verts[i+1]); glVertex2iv(tess_verts[0]);
+		}
+	} else if (current_tess_mode == GL_TRIANGLE_STRIP) {
+		for (i = 0; i + 2 < tess_vert_cnt; i++) {
+			glColor3fv(tess_colors[i]);   glVertex2iv(tess_verts[i]);   glVertex2iv(tess_verts[i+1]);
+			glColor3fv(tess_colors[i+1]); glVertex2iv(tess_verts[i+1]); glVertex2iv(tess_verts[i+2]);
+			glColor3fv(tess_colors[i+2]); glVertex2iv(tess_verts[i+2]); glVertex2iv(tess_verts[i]);
+		}
+	}
 	glEnd();
-}
-
-void vertex_callback(void *data)
-{
-	GLsizei no;
-	GLint *p;
-
-	p=(GLint *)data;
-	no=triangle.no;
-	triangle.p[no][0]=p[0];
-	triangle.p[no][1]=p[1];
-	triangle.p_color[no][0]=triangle.color[0];
-	triangle.p_color[no][1]=triangle.color[1];
-	triangle.p_color[no][2]=triangle.color[2];
-	++(triangle.no);
 }
 
 void set_screen_wh(GLsizei w, GLsizei h)
@@ -123,14 +156,15 @@ void tesse(void)
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
 		glColor3f (0.7, 0.7, 0.0);
-		gluTessCallback(tobj,GLU_BEGIN,glBegin);
-		gluTessCallback(tobj,GLU_END,glEnd);
-		gluTessCallback(tobj,GLU_ERROR,my_error);
-		gluTessCallback(tobj,GLU_VERTEX,glVertex2iv);
+		gluTessCallback(tobj,GLU_BEGIN,(void (*)())glBegin);
+		gluTessCallback(tobj,GLU_END,(void (*)())glEnd);
+		gluTessCallback(tobj,GLU_ERROR,(void (*)())my_error);
+		gluTessCallback(tobj,GLU_VERTEX,(void (*)())glVertex2iv);
 		gluBeginPolygon(tobj);
 		for(j=0;j<=contour_cnt;j++)
 		{
 			point_cnt=contours[j].point_cnt;
+			if (point_cnt < 3) continue;
 			gluNextContour(tobj,GLU_UNKNOWN);
 			for(i=0;i<point_cnt;i++)
 			{
@@ -142,14 +176,15 @@ void tesse(void)
 		}
 		gluEndPolygon(tobj);
 		glLineWidth(2.0);
-		gluTessCallback(tobj,GLU_BEGIN,begin_callback);
-		gluTessCallback(tobj,GLU_END,end_callback);
-		gluTessCallback(tobj,GLU_VERTEX,vertex_callback);
-		gluTessCallback(tobj,GLU_EDGEFLAG,edge_callback);
+		gluTessCallback(tobj,GLU_BEGIN,(void (*)())begin_callback);
+		gluTessCallback(tobj,GLU_END,(void (*)())end_callback);
+		gluTessCallback(tobj,GLU_VERTEX,(void (*)())vertex_callback);
+		gluTessCallback(tobj,GLU_EDGE_FLAG,(void (*)())edge_callback);
 		gluBeginPolygon(tobj);
 		for(j=0;j<=contour_cnt;j++)
 		{
 			point_cnt=contours[j].point_cnt;
+			if (point_cnt < 3) continue;
 			gluNextContour(tobj,GLU_UNKNOWN);
 			for(i=0;i<point_cnt;i++)
 			{
@@ -233,7 +268,6 @@ void mouse_clicked(int button,int state,int x,int y)
 void display(void)
 {
 	GLuint i,j;
-	GLint P[2];
 	GLuint point_cnt;
 
     glClear(GL_COLOR_BUFFER_BIT);

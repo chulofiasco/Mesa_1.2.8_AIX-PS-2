@@ -24,7 +24,7 @@
 
 INCDIR = ../include
 
-GL_LIBS = -L../lib -lMesatk -lMesaGLU -lMesaGL -lm $(XLIBS)
+GL_LIBS = -L../lib -lMesatk -lMesaGLU -lMesaGL -lm -lXext -lX11 $(XLIBS)
 
 LIB_DEP = ../lib/$(GL_LIB) ../lib/$(GLU_LIB) ../lib/$(TK_LIB) ../lib/$(AUX_LIB)
 

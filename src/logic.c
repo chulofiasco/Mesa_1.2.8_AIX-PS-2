@@ -148,7 +148,7 @@ void gl_logic_span( GLuint n, GLint x, GLint y, GLuint index[],
       case GL_COPY_INVERTED:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !index[i];
+	       index[i] = ~index[i];
 	    }
 	 }
 	 break;
@@ -162,7 +162,7 @@ void gl_logic_span( GLuint n, GLint x, GLint y, GLuint index[],
       case GL_INVERT:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !dest[i];
+	       index[i] = ~dest[i];
 	    }
 	 }
 	 break;
@@ -176,7 +176,7 @@ void gl_logic_span( GLuint n, GLint x, GLint y, GLuint index[],
       case GL_NAND:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !(index[i] & dest[i]);
+	       index[i] = ~(index[i] & dest[i]);
 	    }
 	 }
 	 break;
@@ -190,7 +190,7 @@ void gl_logic_span( GLuint n, GLint x, GLint y, GLuint index[],
       case GL_NOR:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !(index[i] | dest[i]);
+	       index[i] = ~(index[i] | dest[i]);
 	    }
 	 }
 	 break;
@@ -204,35 +204,35 @@ void gl_logic_span( GLuint n, GLint x, GLint y, GLuint index[],
       case GL_EQUIV:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !(index[i] ^ dest[i]);
+	       index[i] = ~(index[i] ^ dest[i]);
 	    }
 	 }
 	 break;
       case GL_AND_REVERSE:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = index[i] & !dest[i];
+	       index[i] = index[i] & ~dest[i];
 	    }
 	 }
 	 break;
       case GL_AND_INVERTED:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !index[i] & dest[i];
+	       index[i] = ~index[i] & dest[i];
 	    }
 	 }
 	 break;
       case GL_OR_REVERSE:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = index[i] | !dest[i];
+	       index[i] = index[i] | ~dest[i];
 	    }
 	 }
 	 break;
       case GL_OR_INVERTED:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !index[i] | dest[i];
+	       index[i] = ~index[i] | dest[i];
 	    }
 	 }
 	 break;
@@ -277,7 +277,7 @@ void gl_logic_pixels( GLuint n, const GLint x[], const GLint y[],
       case GL_COPY_INVERTED:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !index[i];
+	       index[i] = ~index[i];
 	    }
 	 }
 	 break;
@@ -291,7 +291,7 @@ void gl_logic_pixels( GLuint n, const GLint x[], const GLint y[],
       case GL_INVERT:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !dest[i];
+	       index[i] = ~dest[i];
 	    }
 	 }
 	 break;
@@ -305,7 +305,7 @@ void gl_logic_pixels( GLuint n, const GLint x[], const GLint y[],
       case GL_NAND:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !(index[i] & dest[i]);
+	       index[i] = ~(index[i] & dest[i]);
 	    }
 	 }
 	 break;
@@ -319,7 +319,7 @@ void gl_logic_pixels( GLuint n, const GLint x[], const GLint y[],
       case GL_NOR:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !(index[i] | dest[i]);
+	       index[i] = ~(index[i] | dest[i]);
 	    }
 	 }
 	 break;
@@ -333,35 +333,35 @@ void gl_logic_pixels( GLuint n, const GLint x[], const GLint y[],
       case GL_EQUIV:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !(index[i] ^ dest[i]);
+	       index[i] = ~(index[i] ^ dest[i]);
 	    }
 	 }
 	 break;
       case GL_AND_REVERSE:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = index[i] & !dest[i];
+	       index[i] = index[i] & ~dest[i];
 	    }
 	 }
 	 break;
       case GL_AND_INVERTED:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !index[i] & dest[i];
+	       index[i] = ~index[i] & dest[i];
 	    }
 	 }
 	 break;
       case GL_OR_REVERSE:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = index[i] | !dest[i];
+	       index[i] = index[i] | ~dest[i];
 	    }
 	 }
 	 break;
       case GL_OR_INVERTED:
          for (i=0;i<n;i++) {
 	    if (mask[i]) {
-	       index[i] = !index[i] | dest[i];
+	       index[i] = ~index[i] | dest[i];
 	    }
 	 }
 	 break;

@@ -167,7 +167,11 @@ next_event (void)
 	int id;
 	float px, py, pz;
 	if (fgets (buffer, 100, stdin) == NULL)
-	  state = DONE;
+	  {
+	    rewind (stdin);
+	    if (fgets (buffer, 100, stdin) == NULL)
+	      state = DONE;
+	  }
 	switch (state)
 	  {
 	  case SKIP:

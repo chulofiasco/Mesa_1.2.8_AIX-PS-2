@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdarg.h>
 #include <math.h>
 #ifndef M_PI
@@ -161,7 +162,7 @@ light_cb (Widget w, XtPointer client_data, XtPointer junk)
   GLwRedrawObjects (mesa);
 }
 
-enum material_mode { MAT_GOLD, MAT_RUBY, MAT_EMERALD };
+enum material_mode { MAT_GOLD, MAT_RUBY, MAT_EMERALD, MAT_SAPPHIRE, MAT_CHROME };
   
 static void
 material_cb (Widget w, XtPointer client_data, XtPointer junk)
@@ -180,6 +181,16 @@ material_cb (Widget w, XtPointer client_data, XtPointer junk)
   GLfloat emerald_diffuse[] = {0.07568, 0.61424, 0.07568, 1.0};
   GLfloat emerald_specular[] = {0.633, 0.727811, 0.633, 1.0};
   GLfloat emerald_shine = 0.6;
+  
+  GLfloat sapphire_ambient[] = {0.0, 0.0, 0.1, 1.0};
+  GLfloat sapphire_diffuse[] = {0.0, 0.1, 0.8, 1.0};
+  GLfloat sapphire_specular[] = {0.8, 0.8, 1.0, 1.0};
+  GLfloat sapphire_shine = 0.8;
+
+  GLfloat chrome_ambient[] = {0.25, 0.25, 0.25, 1.0};
+  GLfloat chrome_diffuse[] = {0.4, 0.4, 0.4, 1.0};
+  GLfloat chrome_specular[] = {0.774597, 0.774597, 0.774597, 1.0};
+  GLfloat chrome_shine = 0.6;
   
   glNewList (material, GL_COMPILE);
   {
@@ -202,6 +213,18 @@ material_cb (Widget w, XtPointer client_data, XtPointer junk)
 	glMaterialfv (GL_FRONT, GL_DIFFUSE, emerald_diffuse);
 	glMaterialfv (GL_FRONT, GL_SPECULAR, emerald_specular);
 	glMaterialf (GL_FRONT, GL_SHININESS, emerald_shine*128.0);
+	break;
+      case MAT_SAPPHIRE:
+	glMaterialfv (GL_FRONT, GL_AMBIENT, sapphire_ambient);
+	glMaterialfv (GL_FRONT, GL_DIFFUSE, sapphire_diffuse);
+	glMaterialfv (GL_FRONT, GL_SPECULAR, sapphire_specular);
+	glMaterialf (GL_FRONT, GL_SHININESS, sapphire_shine*128.0);
+	break;
+      case MAT_CHROME:
+	glMaterialfv (GL_FRONT, GL_AMBIENT, chrome_ambient);
+	glMaterialfv (GL_FRONT, GL_DIFFUSE, chrome_diffuse);
+	glMaterialfv (GL_FRONT, GL_SPECULAR, chrome_specular);
+	glMaterialf (GL_FRONT, GL_SHININESS, chrome_shine*128.0);
 	break;
       }
   }
@@ -232,10 +255,20 @@ main (int argc, char *argv[])
 {
   Widget top, frame, quit;
   Widget fix_obj, fix_obs;
-  Widget gold, ruby, emerald;
+  Widget gold, ruby, emerald, sapphire, chrome;
   XtAppContext app_context;
   Boolean cmap_installed;
   GLuint teapot;
+  Boolean use_rgb = True;
+  int i;
+
+  for (i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-rgb") == 0) {
+      use_rgb = True;
+    } else if (strcmp(argv[i], "-ci") == 0) {
+      use_rgb = False;
+    }
+  }
 
   top = XtVaAppInitialize (&app_context, "Tea", NULL, 0,
 			   &argc, argv, fallback_resources, NULL);
@@ -245,7 +278,8 @@ main (int argc, char *argv[])
 				   NULL);
   mesa = XtVaCreateManagedWidget ("mesa", mesaWorkstationWidgetClass,
 				  frame,
-				  GLwNrgba, True,
+				  GLwNrgba, use_rgb,
+				  GLwNinstallColormap, !use_rgb,
 				  NULL);
 
   fix_obj = XtVaCreateManagedWidget ("fix_obj", toggleWidgetClass,
@@ -291,16 +325,36 @@ main (int argc, char *argv[])
 				     XtNfromVert, ruby, XtNvertDistance, 0,
 				     XtNfromHoriz, mesa, XtNhorizDistance, 10,
 				     NULL);
+  sapphire = XtVaCreateManagedWidget ("sapphire", toggleWidgetClass,
+				     frame,
+				     XtNlabel, "sapphire",
+				     XtNstate, False,
+				     XtNradioGroup, gold,
+				     XtNfromVert, emerald, XtNvertDistance, 0,
+				     XtNfromHoriz, mesa, XtNhorizDistance, 10,
+				     NULL);
+  chrome = XtVaCreateManagedWidget ("chrome", toggleWidgetClass,
+				     frame,
+				     XtNlabel, "chrome",
+				     XtNstate, False,
+				     XtNradioGroup, gold,
+				     XtNfromVert, sapphire, XtNvertDistance, 0,
+				     XtNfromHoriz, mesa, XtNhorizDistance, 10,
+				     NULL);
   XtOverrideTranslations (gold, toggle_translations);
   XtOverrideTranslations (ruby, toggle_translations);
   XtOverrideTranslations (emerald, toggle_translations);
+  XtOverrideTranslations (sapphire, toggle_translations);
+  XtOverrideTranslations (chrome, toggle_translations);
   XtAddCallback (gold, XtNcallback, material_cb, (XtPointer) MAT_GOLD);
   XtAddCallback (ruby, XtNcallback, material_cb, (XtPointer) MAT_RUBY);
   XtAddCallback (emerald, XtNcallback, material_cb, (XtPointer) MAT_EMERALD);
+  XtAddCallback (sapphire, XtNcallback, material_cb, (XtPointer) MAT_SAPPHIRE);
+  XtAddCallback (chrome, XtNcallback, material_cb, (XtPointer) MAT_CHROME);
 
   quit = XtVaCreateManagedWidget ("quit", commandWidgetClass,
 				  frame,
-				  XtNfromVert, emerald, XtNvertDistance, 50,
+				  XtNfromVert, chrome, XtNvertDistance, 50,
 				  XtNfromHoriz, mesa, XtNhorizDistance, 10,
 				  NULL);
   XtAddCallback (quit, XtNcallback, quit_function, NULL);
@@ -322,6 +376,10 @@ main (int argc, char *argv[])
 			XtNbackground, XtNforeground, XtNborder, NULL);
       translate_pixels (mesa, emerald,
 			XtNbackground, XtNforeground, XtNborder, NULL);
+      translate_pixels (mesa, sapphire,
+			XtNbackground, XtNforeground, XtNborder, NULL);
+      translate_pixels (mesa, chrome,
+			XtNbackground, XtNforeground, XtNborder, NULL);
       translate_pixels (mesa, frame, XtNbackground, XtNborder, NULL);
       XWarpPointer (XtDisplay (mesa), None, XtWindow (mesa),
 		    0, 0, 0, 0, 0, 0);
@@ -338,7 +396,10 @@ main (int argc, char *argv[])
   glDepthFunc (GL_LESS);
 
   GLwSetFrustumProjection (mesa, -1.0, 1.0, -1.0, 1.0, 1.0, 10.0);
-  GLwSetPolarView (mesa, 3.0, 2*M_PI/3, -M_PI/3);
+  /* We place the observer in the "northern hemisphere" by setting
+     theta to M_PI/3.0. We set phi to M_PI/3.0 to look from the
+     front-right.  */
+  GLwSetPolarView (mesa, 3.0, M_PI/3.0, M_PI/3.0);
 
   teapot = glGenLists (1);
   glNewList (teapot, GL_COMPILE);
@@ -517,11 +578,7 @@ teapot(GLint grid, GLdouble scale, GLenum type)
   glEnable(GL_MAP2_VERTEX_3);
   glEnable(GL_MAP2_TEXTURE_COORD_2);
   glPushMatrix();
-  /* glRotatef(270.0, 1.0, 0.0, 0.0); */
-  /* Rotate it upwards in the standard MesaWorkstation
-     coordinate system.  */
-  glRotatef(90.0, 0.0, 1.0, 0.0);
-  glRotatef(90.0, 1.0, 0.0, 0.0);
+  glRotatef(270.0, 1.0, 0.0, 0.0);
   glScalef(0.5 * scale, 0.5 * scale, 0.5 * scale);
   glTranslatef(0.0, 0.0, -1.5);
   for (i = 0; i < 10; i++) {

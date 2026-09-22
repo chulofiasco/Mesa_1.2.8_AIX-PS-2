@@ -273,13 +273,23 @@ static void triangulate_ccw(
 {
 	tess_vertex *vertex;
 	GLuint vertex_cnt=contour->vertex_cnt;
+	GLuint tries;
 
 	while(vertex_cnt > 3)
 	{
 		vertex=contour->vertices;
+		tries=0;
 		while(diagonal_ccw(vertex,vertex->next->next,tobj,contour)==GL_FALSE &&
-			tobj->error==GLU_NO_ERROR)
+			tobj->error==GLU_NO_ERROR && tries < vertex_cnt)
+		{
 			vertex=vertex->next;
+			tries++;
+		}
+		if(tries >= vertex_cnt && tobj->error==GLU_NO_ERROR)
+		{
+			tess_call_user_error(tobj, GLU_TESS_ERROR5);
+			return;
+		}
 		if(tobj->error!=GLU_NO_ERROR)
 			return;
 		clip_ear(tobj,vertex->next,contour);
@@ -293,13 +303,23 @@ static void triangulate_cw(
 {
 	tess_vertex *vertex;
 	GLuint vertex_cnt=contour->vertex_cnt;
+	GLuint tries;
 
 	while(vertex_cnt > 3)
 	{
 		vertex=contour->vertices;
+		tries=0;
 		while(diagonal_cw(vertex,vertex->next->next,tobj,contour)==GL_FALSE &&
-			tobj->error==GLU_NO_ERROR)
+			tobj->error==GLU_NO_ERROR && tries < vertex_cnt)
+		{
 			vertex=vertex->next;
+			tries++;
+		}
+		if(tries >= vertex_cnt && tobj->error==GLU_NO_ERROR)
+		{
+			tess_call_user_error(tobj, GLU_TESS_ERROR5);
+			return;
+		}
 		if(tobj->error!=GLU_NO_ERROR)
 			return;
 		clip_ear(tobj,vertex->next,contour);
@@ -313,13 +333,23 @@ static void triangulate_ccw_with_edge_flag(
 {
 	tess_vertex *vertex;
 	GLuint vertex_cnt=contour->vertex_cnt;
+	GLuint tries;
 
 	while(vertex_cnt > 3)
 	{
 		vertex=contour->vertices;
+		tries=0;
 		while(diagonal_ccw(vertex,vertex->next->next,tobj,contour)==GL_FALSE &&
-			tobj->error==GLU_NO_ERROR)
+			tobj->error==GLU_NO_ERROR && tries < vertex_cnt)
+		{
 			vertex=vertex->next;
+			tries++;
+		}
+		if(tries >= vertex_cnt && tobj->error==GLU_NO_ERROR)
+		{
+			tess_call_user_error(tobj, GLU_TESS_ERROR5);
+			return;
+		}
 		if(tobj->error!=GLU_NO_ERROR)
 			return;
 		clip_ear_with_edge_flag(tobj,vertex->next,contour);
@@ -333,13 +363,23 @@ static void triangulate_cw_with_edge_flag(
 {
 	tess_vertex *vertex;
 	GLuint vertex_cnt=contour->vertex_cnt;
+	GLuint tries;
 
 	while(vertex_cnt > 3)
 	{
 		vertex=contour->vertices;
+		tries=0;
 		while(diagonal_cw(vertex,vertex->next->next,tobj,contour)==GL_FALSE &&
-			tobj->error==GLU_NO_ERROR)
+			tobj->error==GLU_NO_ERROR && tries < vertex_cnt)
+		{
 			vertex=vertex->next;
+			tries++;
+		}
+		if(tries >= vertex_cnt && tobj->error==GLU_NO_ERROR)
+		{
+			tess_call_user_error(tobj, GLU_TESS_ERROR5);
+			return;
+		}
 		if(tobj->error!=GLU_NO_ERROR)
 			return;
 		clip_ear_with_edge_flag(tobj,vertex->next,contour);

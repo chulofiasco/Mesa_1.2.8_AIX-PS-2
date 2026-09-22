@@ -92,7 +92,7 @@ static void Animate(void)
     struct facet *facet;
     float *lastColor;
     float *thisColor;
-    GLint i, j;
+    volatile long i, j;
 
     glClear(clearMask);
 
@@ -115,6 +115,7 @@ static void Animate(void)
 	    facet = GETFACET(curFrame, i, j);
 	    if (!smooth && lighting) {
 		glNormal3fv(facet->normal);
+		facet = GETFACET(curFrame, i, j);
 	    }
 	    if (lighting) {
 		if (rgb) {
@@ -143,12 +144,14 @@ static void Animate(void)
 		coord = GETCOORD(curFrame, i, j);
 		if (smooth && lighting) {
 		    glNormal3fv(coord->normal);
+		    coord = GETCOORD(curFrame, i, j);
 		}
 		glVertex3fv(coord->vertex);
 
 		coord = GETCOORD(curFrame, i+1, j);
 		if (smooth && lighting) {
 		    glNormal3fv(coord->normal);
+		    coord = GETCOORD(curFrame, i+1, j);
 		}
 		glVertex3fv(coord->vertex);
 	    }
@@ -156,12 +159,14 @@ static void Animate(void)
 	    coord = GETCOORD(curFrame, i, j+1);
 	    if (smooth && lighting) {
 		glNormal3fv(coord->normal);
+		coord = GETCOORD(curFrame, i, j+1);
 	    }
 	    glVertex3fv(coord->vertex);
 
 	    coord = GETCOORD(curFrame, i+1, j+1);
 	    if (smooth && lighting) {
 		glNormal3fv(coord->normal);
+		coord = GETCOORD(curFrame, i+1, j+1);
 	    }
 	    glVertex3fv(coord->vertex);
 
@@ -180,9 +185,9 @@ static void SetColorMap(void)
 {
     static float green[3] = {0.2, 1.0, 0.2};
     static float red[3] = {1.0, 0.2, 0.2};
-    float *color, percent;
-    GLint *indexes, entries, i, j;
-    long buf[4];
+    float *color = NULL, percent;
+    GLint *indexes = NULL, entries;
+    volatile long i, j;
 
     entries = tkGetColorMapSize();
 
@@ -226,8 +231,9 @@ static void InitMesh(void)
     struct facet *facet;
     float dp1[3], dp2[3];
     float *pt1, *pt2, *pt3;
-    float angle, d, x, y;
-    GLint numFacets, numCoords, frameNum, i, j;
+    volatile float angle, d, x, y;
+    GLint numFacets, numCoords;
+    volatile long frameNum, i, j;
 
     theMesh.widthX = widthX;
     theMesh.widthY = widthY;
@@ -260,17 +266,21 @@ static void InitMesh(void)
 		}
 		angle = 2 * PI * d + (2 * PI / frames * frameNum);
 
-		coord = GETCOORD(frameNum, i, j);
+		{
+		    float z_val = (height - height * d) * cos(angle);
+		    float nx_val = -(height / d) * x * ((1 - d) * 2 * PI * sin(angle) + cos(angle));
+		    float ny_val = -(height / d) * y * ((1 - d) * 2 * PI * sin(angle) + cos(angle));
 
-		coord->vertex[0] = x - 0.5;
-		coord->vertex[1] = y - 0.5;
-		coord->vertex[2] = (height - height * d) * cos(angle);
+		    coord = GETCOORD(frameNum, i, j);
 
-		coord->normal[0] = -(height / d) * x * ((1 - d) * 2 * PI *
-				   sin(angle) + cos(angle));
-		coord->normal[1] = -(height / d) * y * ((1 - d) * 2 * PI *
-				   sin(angle) + cos(angle));
-		coord->normal[2] = -1;
+		    coord->vertex[0] = x - 0.5;
+		    coord->vertex[1] = y - 0.5;
+		    coord->vertex[2] = z_val;
+
+		    coord->normal[0] = nx_val;
+		    coord->normal[1] = ny_val;
+		    coord->normal[2] = -1;
+		}
 
 		d = 1.0 / sqrt(coord->normal[0]*coord->normal[0]+
 			       coord->normal[1]*coord->normal[1]+1);
@@ -346,7 +356,7 @@ static void InitMaterials(void)
     static float lmodel_twoside[] = {GL_TRUE};
 
     glMatrixMode(GL_PROJECTION);
-    gluPerspective(450, 1.0, 0.5, 10.0);
+    gluPerspective(450.0, 1.0, 0.5, 10.0);
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
@@ -376,11 +386,11 @@ static void InitMaterials(void)
 static void InitTexture(void)
 {
 
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 }
 
 static void Init(void)
@@ -509,10 +519,10 @@ static GLenum Key(int key, GLenum mask)
 
 static GLenum Args(int argc, char **argv)
 {
-    GLint i;
+    volatile long i;
 
     rgb = GL_TRUE;
-    doubleBuffer = GL_FALSE;
+    doubleBuffer = GL_TRUE;
     directRender = GL_TRUE;
     frames = 10;
     widthX = 10;

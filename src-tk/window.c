@@ -371,6 +371,7 @@ static int WaitForMainWindow(Display *d, XEvent *e, char *arg)
     }
 }
 
+#if 0
 static int WaitForOverlayWindow(Display *d, XEvent *e, char *arg)
 {
 
@@ -380,6 +381,7 @@ static int WaitForOverlayWindow(Display *d, XEvent *e, char *arg)
 	return GL_FALSE;
     }
 }
+#endif
 
 GLenum tkInitWindow(char *title)
 {
@@ -507,7 +509,6 @@ GLenum tkInitWindow(char *title)
 			    CWBackPixmap|CWBorderPixel|CWEventMask|CWColormap,
 			    &wa);
 
-    /*OLD: XInstallColormap( xDisplay, w.cMapMain );*/
     XSetWMColormapWindows( xDisplay, w.wMain, &w.wMain, 1 );
 
     XStringListToTextProperty(&title, 1, &tp);

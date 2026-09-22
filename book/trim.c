@@ -98,14 +98,14 @@ void myinit(void)
 
 void display(void)
 {
-    GLfloat knots[8] = {0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0};
-    GLfloat edgePt[5][2] = /* counter clockwise */
+    static GLfloat knots[8] = {0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0};
+    static GLfloat edgePt[5][2] = /* counter clockwise */
     {{0.0, 0.0}, {1.0, 0.0}, {1.0, 1.0}, {0.0, 1.0}, {0.0, 0.0}};
-    GLfloat curvePt[4][2] = /* clockwise */ 
+    static GLfloat curvePt[4][2] = /* clockwise */ 
     {{0.25, 0.5}, {0.25, 0.75}, {0.75, 0.75}, {0.75, 0.5}};
-    GLfloat curveKnots[8] = 
+    static GLfloat curveKnots[8] = 
 	{0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0};
-    GLfloat pwlPt[4][2] = /* clockwise */ 
+    static GLfloat pwlPt[4][2] = /* clockwise */ 
 	{{0.75, 0.5}, {0.5, 0.25}, {0.25, 0.5}};
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -133,7 +133,8 @@ void display(void)
     gluEndSurface(theNurb);
         
     glPopMatrix();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -152,7 +153,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DEPTH);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DEPTH);
     auxInitPosition (0, 0, 500, 500);
     auxInitWindow (argv[0]);
     myinit();

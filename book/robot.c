@@ -86,7 +86,8 @@ void display(void)
     auxWireBox(2.0, 0.4, 1.0);
 
     glPopMatrix();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myinit (void) 
@@ -111,7 +112,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB | AUX_DIRECT);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB | AUX_DIRECT);
     auxInitPosition (0, 0, 400, 400);
     auxInitWindow (argv[0]);
 

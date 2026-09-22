@@ -258,9 +258,9 @@ void gluCylinder( GLUquadricObj *qobj,
                   GLdouble baseRadius, GLdouble topRadius, GLdouble height,
                   GLint slices, GLint stacks )
 {
-   GLdouble a, da, r, dr, dz;
-   GLfloat x, y, z, nz, nsign;
-   GLint i, j;
+   volatile GLdouble a, da, r, dr, dz;
+   volatile GLfloat x, y, z, nz, nsign;
+   volatile GLint i, j;
 
    if (qobj->Orientation==GLU_INSIDE) {
       nsign = -1.0;
@@ -389,12 +389,13 @@ void gluCylinder( GLUquadricObj *qobj,
 void gluSphere( GLUquadricObj *qobj,
                 GLdouble radius, GLint slices, GLint stacks )
 {
-   GLfloat rho, drho, theta, dtheta;
-   GLfloat x, y, z;
-   GLfloat s, t, ds, dt;
-   GLint i, j, imin, imax;
+   volatile GLfloat rho, drho, theta, dtheta;
+   volatile GLfloat x, y, z;
+   volatile GLfloat s, t, ds, dt;
+   volatile GLint i, j;
+   GLint imin, imax;
    GLboolean normals;
-   GLfloat nsign;
+   volatile GLfloat nsign;
 
    if (qobj->Normals==GLU_NONE) {
       normals = GL_FALSE;
@@ -554,11 +555,11 @@ void gluDisk( GLUquadricObj *qobj,
               GLdouble innerRadius, GLdouble outerRadius,
               GLint slices, GLint loops )
 {
-   GLdouble a, da;
-   GLfloat r, dr;
-   GLfloat x, y;
-   GLfloat r1, r2, dtc;
-   GLint s, l;
+   volatile GLdouble a, da;
+   volatile GLfloat r, dr;
+   volatile GLfloat x, y;
+   volatile GLfloat r1, r2, dtc;
+   volatile GLint s, l;
 
    /* Normal vectors */
    if (qobj->Normals!=GLU_NONE) {

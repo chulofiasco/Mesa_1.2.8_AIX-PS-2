@@ -97,16 +97,16 @@ static GLenum Key(int key, GLenum mask)
 	}
 	break;
       case TK_LEFT:
-	point[0] -= 0.25;
+	point[0] -= 5.0;
 	break;
       case TK_RIGHT:
-	point[0] += 0.25;
+	point[0] += 5.0;
 	break;
       case TK_UP:
-	point[1] += 0.25;
+	point[1] += 5.0;
 	break;
       case TK_DOWN:
-	point[1] -= 0.25;
+	point[1] -= 5.0;
 	break;
       default:
 	return GL_FALSE;

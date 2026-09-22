@@ -189,7 +189,7 @@ void loaddxdy(void)
 
 void display(void)
 {
-    int i;
+    volatile long i;
 
     glClear(GL_ACCUM_BUFFER_BIT);
     loaddxdy();
@@ -206,7 +206,8 @@ void display(void)
     printf("final job\n");
     glAccum(GL_RETURN, 1.0);
     printf("done\n");
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -227,7 +228,7 @@ void myReshape(int w, int h)
 
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB
 			| AUX_ACCUM | AUX_DEPTH);
     auxInitPosition (0, 0, 300, 300);
     auxInitWindow (argv[0]);

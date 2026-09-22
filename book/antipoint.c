@@ -48,8 +48,8 @@
  */
 void myinit(void)
 {
-    glEnable (GL_POINT_SMOOTH);
-    glEnable (GL_BLEND);
+    /* glEnable (GL_POINT_SMOOTH); */
+    /* glEnable (GL_BLEND); */
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glHint (GL_POINT_SMOOTH_HINT, GL_DONT_CARE);
     glPointSize (3.0);
@@ -61,16 +61,18 @@ void myinit(void)
  */
 void display(void)
 {
-    int i;
+    volatile long i;
 
     glClear (GL_COLOR_BUFFER_BIT);
     glColor4f (1.0, 1.0, 1.0, 1.0);
     glBegin (GL_POINTS);
 	for (i = 1; i < 10; i++) {
-	    glVertex2f ((GLfloat) i * 10.0, (GLfloat) i * 10.0);
+        int index = i;
+	    glVertex2f ((GLfloat) index * 10.0, (GLfloat) index * 10.0);
 	}
     glEnd ();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -94,7 +96,7 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 100, 100);
     auxInitWindow (argv[0]);
     myinit();

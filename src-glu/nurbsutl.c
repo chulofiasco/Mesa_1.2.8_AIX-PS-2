@@ -157,7 +157,7 @@ set_new_t_min_t_max(knot_str_type *geom_knot, knot_str_type *color_knot,
 	knot_str_type *normal_knot, knot_str_type *texture_knot,
 	GLfloat maximal_min_knot, GLfloat minimal_max_knot)
 {
-	GLuint	t_min,t_max,cnt;
+	GLuint	t_min=0,t_max=0,cnt;
 
 	if(minimal_max_knot-maximal_min_knot < EPSILON)
 	{
@@ -603,6 +603,7 @@ calc_factor(GLfloat *pts,GLint order,GLint indx,GLint stride,GLfloat tolerance,
 				z=0.0;
 			else
 				z=(GLdouble)pts[indx+i*stride+2];
+			
 			if(gluProject(x,y,z,model,proj,viewport,&winx2,&winy2,&winz))
 			{
 				dx=winx2-winx1;
@@ -613,6 +614,12 @@ calc_factor(GLfloat *pts,GLint order,GLint indx,GLint stride,GLfloat tolerance,
 		}
 	}
 	len /= tolerance;
+	if (len >= 0.0 && len <= 100.0) {
+		/* valid len */
+	} else {
+		/* handles NaN, Infinity, negative values, and len > 100.0 */
+		len = 100.0;
+	}
 	return ((GLint)len+1);
 }
 
@@ -645,19 +652,19 @@ calc_sampling_3D(new_ctrl_type *new_ctrl, GLfloat tolerance, GLint dim,
 	for(j=0;j<vfactor_cnt;j++)
 	{
 		*(*vfactors+j*3+1)=tmp_factor1=calc_factor(ctrl,vorder,
-			j*offset1,dim,tolerance,dim);
+			j*offset1,new_ctrl->geom_t_stride,tolerance,dim);
 		/* loop ufactor_cnt-1 times */
 		for(i=1;i<ufactor_cnt;i++)
 		{
 			tmp_factor2=calc_factor(ctrl,vorder,
-				j*offset1+i*offset2,dim,tolerance,dim);
+				j*offset1+i*offset2,new_ctrl->geom_t_stride,tolerance,dim);
 			if(tmp_factor2>tmp_factor1)
 				tmp_factor1=tmp_factor2;
 		}
 		/* last time for the opposite edge */
 		*(*vfactors+j*3+2)=tmp_factor2=calc_factor(ctrl,vorder,
 			j*offset1+i*offset2-new_ctrl->geom_s_stride,
-			dim,tolerance,dim);
+			new_ctrl->geom_t_stride,tolerance,dim);
 		if(tmp_factor2>tmp_factor1)
 			*(*vfactors+j*3)=tmp_factor2;
 		else
@@ -726,7 +733,7 @@ set_sampling_and_culling( GLUnurbsObj *nobj )
 		glPushAttrib( (GLbitfield) (GL_VIEWPORT_BIT | GL_TRANSFORM_BIT));
 		for(i=0;i<4;i++)
 			m[i]=nobj->sampling_matrices.viewport[i];
-		glViewport(m[0],m[1],m[2],m[3]);
+		glViewport((GLint)m[0], (GLint)m[1], (GLsizei)m[2], (GLsizei)m[3]);
 		glMatrixMode(GL_PROJECTION);
 		glPushMatrix();
 		glLoadMatrixf(nobj->sampling_matrices.proj);

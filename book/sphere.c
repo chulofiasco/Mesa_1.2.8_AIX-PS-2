@@ -48,12 +48,15 @@ void display (void)
 {
     glClear(GL_COLOR_BUFFER_BIT);
     glColor3f (1.0, 1.0, 1.0);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     glPushMatrix();
 /*	glTranslatef() as viewing transformation	*/
     glTranslatef (0.0, 0.0, -5.0);
+    glRotatef(30.0, 1.0, 1.0, 0.0); /* Rotate to reveal 3D depth */
     auxWireSphere(1.0);
     glPopMatrix();
-    glFlush();
+    auxSwapBuffers();
 }
 
 void myinit (void) 
@@ -76,11 +79,10 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 400, 400);
     auxInitWindow (argv[0]);
     myinit ();
     auxReshapeFunc (myReshape);
     auxMainLoop(display);
 }
-

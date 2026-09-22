@@ -34,6 +34,8 @@
 
 
 GLenum doubleBuffer, directRender;
+GLenum autoRotate = GL_FALSE;
+int mouseDown = 0, lastX = 0, lastY = 0;
 
 char *texFileName = 0;
 TK_RGBImageRec *image;
@@ -52,7 +54,7 @@ float ln_mipmap_ln[] = {GL_LINEAR_MIPMAP_LINEAR};
 GLint sphereMap[] = {GL_SPHERE_MAP};
 
 GLenum doSphere = GL_FALSE;
-float xRotation = 0.0, yRotation = 0.0, zTranslate = -3.125;
+float xRotation = 0.0, yRotation = 0.0, zTranslate = -6.0;
 
 GLint cube;
 float c[6][4][3] = {
@@ -251,7 +253,7 @@ static float t[6][4][2] = {
 
 static void BuildCube(void)
 {
-    GLint i;
+    volatile long i;
 
     glNewList(cube, GL_COMPILE);
     for (i = 0; i < 6; i++) {
@@ -302,8 +304,45 @@ static void Reshape(int width, int height)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(145.0, 1.0, 0.01, 1000);
+    gluPerspective(45.0, 1.0, 0.01, 1000);
     glMatrixMode(GL_MODELVIEW);
+}
+
+static void Draw(void);
+
+static void Animate(void)
+{
+    if (autoRotate) {
+        yRotation += 0.5;
+        xRotation += 0.5;
+        Draw();
+    }
+}
+
+static GLenum MouseDown(int mouseX, int mouseY, GLenum button)
+{
+    mouseDown = 1;
+    lastX = mouseX;
+    lastY = mouseY;
+    return GL_TRUE;
+}
+
+static GLenum MouseUp(int mouseX, int mouseY, GLenum button)
+{
+    mouseDown = 0;
+    return GL_TRUE;
+}
+
+static GLenum MouseMove(int mouseX, int mouseY, GLenum button)
+{
+    if (mouseDown) {
+        yRotation += (mouseX - lastX) * 0.5;
+        xRotation += (mouseY - lastY) * 0.5;
+        lastX = mouseX;
+        lastY = mouseY;
+        Draw();
+    }
+    return GL_TRUE;
 }
 
 static GLenum Key(int key, GLenum mask)
@@ -312,6 +351,15 @@ static GLenum Key(int key, GLenum mask)
     switch (key) {
       case TK_ESCAPE:
 	tkQuit();
+
+      case TK_SPACE:
+	autoRotate = !autoRotate;
+	if (autoRotate) {
+	    tkIdleFunc(Animate);
+	} else {
+	    tkIdleFunc(0);
+	}
+	break;
 
       case TK_LEFT:
 	yRotation -= 0.5;
@@ -404,9 +452,9 @@ static void Draw(void)
 
 static GLenum Args(int argc, char **argv)
 {
-    GLint i;
+    volatile long i;
 
-    doubleBuffer = GL_FALSE;
+    doubleBuffer = GL_TRUE;
     directRender = GL_TRUE;
 
     for (i = 1; i < argc; i++) {
@@ -464,6 +512,9 @@ void main(int argc, char **argv)
     tkExposeFunc(Reshape);
     tkReshapeFunc(Reshape);
     tkKeyDownFunc(Key);
+    tkMouseDownFunc(MouseDown);
+    tkMouseUpFunc(MouseUp);
+    tkMouseMoveFunc(MouseMove);
     tkDisplayFunc(Draw);
     tkExec();
 }

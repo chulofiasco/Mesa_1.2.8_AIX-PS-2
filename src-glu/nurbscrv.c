@@ -83,7 +83,9 @@ test_nurbs_curve(GLUnurbsObj *nobj, curve_attribs *attribs)
 		call_user_error(nobj,GLU_INVALID_VALUE);
 		return GLU_ERROR;
 	}
+	tmp_int = 30;
 	glGetIntegerv(GL_MAX_EVAL_ORDER,&tmp_int);
+	if (tmp_int < 2) tmp_int = 30;
 	if(attribs->order > tmp_int || attribs->order < 2)
 	{
 		call_user_error(nobj,GLU_NURBS_ERROR1);
@@ -121,15 +123,15 @@ test_nurbs_curves(GLUnurbsObj *nobj)
 		return GLU_ERROR;
 	/* now test the attributive data */
 	/* color */
-	if(nobj->curve.color.type!=GLU_INVALID_ENUM)
+	if((nobj->curve.color.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 		if(test_nurbs_curve(nobj,&(nobj->curve.color))!=GLU_NO_ERROR)
 			return GLU_ERROR;
 	/* normal */
-	if(nobj->curve.normal.type!=GLU_INVALID_ENUM)
+	if((nobj->curve.normal.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 		if(test_nurbs_curve(nobj,&(nobj->curve.normal))!=GLU_NO_ERROR)
 			return GLU_ERROR;
 	/* texture */
-	if(nobj->curve.texture.type!=GLU_INVALID_ENUM)
+	if((nobj->curve.texture.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 		if(test_nurbs_curve(nobj,&(nobj->curve.texture))!=GLU_NO_ERROR)
 			return GLU_ERROR;
 	return GLU_NO_ERROR;
@@ -172,7 +174,7 @@ fill_knot_structures(GLUnurbsObj *nobj,knot_str_type *geom_knot,
 	}
 	else
 		geom_knot->open_at_end=GL_FALSE;
-	if(nobj->curve.color.type!=GLU_INVALID_ENUM)
+	if((nobj->curve.color.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 	{
 		color_knot->unified_knot=(GLfloat *)1;
 		knot=color_knot->knot=nobj->curve.color.knot;
@@ -203,7 +205,7 @@ fill_knot_structures(GLUnurbsObj *nobj,knot_str_type *geom_knot,
 	}
 	else
 		color_knot->unified_knot=NULL;
-	if(nobj->curve.normal.type!=GLU_INVALID_ENUM)
+	if((nobj->curve.normal.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 	{
 		normal_knot->unified_knot=(GLfloat *)1;
 		knot=normal_knot->knot=nobj->curve.normal.knot;
@@ -234,7 +236,7 @@ fill_knot_structures(GLUnurbsObj *nobj,knot_str_type *geom_knot,
 	}
 	else
 		normal_knot->unified_knot=NULL;
-	if(nobj->curve.texture.type!=GLU_INVALID_ENUM)
+	if((nobj->curve.texture.type & 0xffff) != (GLU_INVALID_ENUM & 0xffff))
 	{
 		texture_knot->unified_knot=(GLfloat *)1;
 		knot=texture_knot->knot=nobj->curve.texture.knot;
@@ -392,9 +394,9 @@ void do_nurbs_curve( GLUnurbsObj *nobj)
 	GLenum geom_type;
 	GLint n_ctrl;
 	GLfloat *new_geom_ctrl,*new_color_ctrl,*new_normal_ctrl,*new_texture_ctrl;
-	GLfloat *geom_ctrl,*color_ctrl,*normal_ctrl,*texture_ctrl;
+	GLfloat *geom_ctrl, *color_ctrl=NULL, *normal_ctrl=NULL, *texture_ctrl=NULL;
 	GLint *factors;
-	GLint i,j;
+	volatile long i,j;
 	GLint geom_dim,color_dim=0,normal_dim=0,texture_dim=0;
 
 	/* test the user supplied data */

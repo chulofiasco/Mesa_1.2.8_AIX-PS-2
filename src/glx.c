@@ -572,7 +572,7 @@ static XVisualInfo *choose_x_visual( Display *dpy, int screen,
                                      int preferred_class )
 {
    XVisualInfo *vis;
-   int xclass, visclass;
+   int xclass, visclass = 0;
    int depth;
 
    if (rgba) {
@@ -1111,7 +1111,7 @@ Bool glXMakeCurrent( Display *dpy, GLXDrawable drawable, GLXContext ctx )
       /* determine if the drawable is a GLXPixmap */
       GLuint i;
       GLboolean pixmap_flag = GL_FALSE;
-      Colormap cmap;
+      Colormap cmap = 0;
       for (i=0;i<NumPixmaps;i++) {
 	 if (PixmapList[i].pixmap==drawable) {
 	    cmap = PixmapList[i].cmap;

@@ -84,7 +84,7 @@ void drawGeometry (GLenum mode)
 void print3DcolorVertex (GLint size, 
 	GLint *count, GLfloat *buffer)
 {
-    int i;
+    volatile long i;
 
     printf ("  ");
     for (i = 0; i < 7; i++) {
@@ -152,7 +152,7 @@ void display(void)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_RGB);
+    auxInitDisplayMode (AUX_DOUBLE | AUX_RGB);
     auxInitPosition (0, 0, 100, 100);
     auxInitWindow (argv[0]);
     myinit ();

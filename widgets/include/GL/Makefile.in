@@ -44,10 +44,15 @@ HEADERS = GLwDrawA.h GLwDrawAP.h GLwMDrawA.h GLwMDrawAP.h \
 all:
 
 install: $(HEADERS)
-	$(INSTALL_DATA) $(HEADERS) $(incdir)
+	@if [ -f $(incdir) ] && [ ! -d $(incdir) ]; then rm -f $(incdir); fi
+	$(top_srcdir)/install-sh -d $(incdir)
+	@for file in $(HEADERS); do \
+		echo "$(INSTALL_DATA) $$file $(incdir)"; \
+		$(INSTALL_DATA) $$file $(incdir); \
+	done
 
 uninstall:
-	cd $(incdir) && rm -f $(HEADERS)
+	if [ -d $(incdir) ]; then cd $(incdir) && rm -f $(HEADERS); fi
 
 # Standard GNU clean* targets:
 maintainer-clean: clean

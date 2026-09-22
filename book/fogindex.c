@@ -44,6 +44,7 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdlib.h>
+#include <math.h>
 #include "glaux.h"
 
 /*  Initialize color map and fog.  Set screen clear color 
@@ -52,53 +53,102 @@
 #define NUMCOLORS 32
 #define RAMPSTART 16
 
+static int use_rgb = 0;
+
 void myinit(void)
 {
-    int i;
+    volatile long i;
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-    for (i = 0; i < NUMCOLORS; i++) {
-	GLfloat shade;
-	shade = (GLfloat) (NUMCOLORS-i)/(GLfloat) NUMCOLORS;
-	auxSetOneColor (16 + i, shade, shade, shade);
-    }
-    glEnable(GL_FOG);
 
-    glFogi (GL_FOG_MODE, GL_LINEAR);
-    glFogi (GL_FOG_INDEX, NUMCOLORS);
-    glFogf (GL_FOG_START, 0.0);
-    glFogf (GL_FOG_END, 4.0);
-    glHint (GL_FOG_HINT, GL_NICEST);
-    glClearIndex((GLfloat) (NUMCOLORS+RAMPSTART-1));
+    if (use_rgb) {
+        GLfloat fogColor[4] = {0.0, 0.0, 0.0, 1.0};
+        glEnable(GL_FOG);
+        glFogi(GL_FOG_MODE, GL_LINEAR);
+        glFogfv(GL_FOG_COLOR, fogColor);
+        glFogf(GL_FOG_START, 0.0);
+        glFogf(GL_FOG_END, 4.0);
+        glHint(GL_FOG_HINT, GL_FASTEST);
+        glClearColor(0.0, 0.0, 0.0, 1.0);
+
+        {
+            GLfloat light_pos[] = {5.0, 5.0, 5.0, 1.0};
+            glEnable(GL_LIGHTING);
+            glEnable(GL_LIGHT0);
+            glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+            glEnable(GL_COLOR_MATERIAL);
+            glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+        }
+    } else {
+        for (i = 0; i < NUMCOLORS; i++) {
+            int index = i;
+            GLfloat shade;
+            shade = (GLfloat) (NUMCOLORS-index)/(GLfloat) NUMCOLORS;
+            auxSetOneColor (16 + index, shade, shade, shade);
+        }
+        glEnable(GL_FOG);
+
+        glFogi (GL_FOG_MODE, GL_LINEAR);
+        glFogi (GL_FOG_INDEX, NUMCOLORS);
+        glFogf (GL_FOG_START, 0.0);
+        glFogf (GL_FOG_END, 4.0);
+        glHint (GL_FOG_HINT, GL_NICEST);
+        glClearIndex((GLfloat) (NUMCOLORS+RAMPSTART-1));
+    }
 }
 
 /*  display() renders 3 cones at different z positions.
  */
+void mySolidCone(GLfloat base, GLfloat height) {
+    volatile int i;
+    int slices = 15;
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(0.0, 0.0, height);
+    for (i = 0; i <= slices; i++) {
+        int idx = i;
+        float angle = 2.0 * 3.1415926 * (float)idx / (float)slices;
+        glVertex3f(base * cos(angle), base * sin(angle), 0.0);
+    }
+    glEnd();
+    glBegin(GL_TRIANGLE_FAN);
+    glVertex3f(0.0, 0.0, 0.0);
+    for (i = slices; i >= 0; i--) {
+        int idx = i;
+        float angle = 2.0 * 3.1415926 * (float)idx / (float)slices;
+        glVertex3f(base * cos(angle), base * sin(angle), 0.0);
+    }
+    glEnd();
+}
+
 void display(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glPushMatrix ();
     glTranslatef (-1.0, -1.0, -1.0);
     glRotatef (-90.0, 1.0, 0.0, 0.0);
-    glIndexi (RAMPSTART);
+    if (use_rgb) glColor3f(1.0, 0.2, 0.2); /* Red */
+    else glIndexi (RAMPSTART);
     auxSolidCone(1.0, 2.0);
     glPopMatrix ();
 
     glPushMatrix ();
     glTranslatef (0.0, -1.0, -2.25);
     glRotatef (-90.0, 1.0, 0.0, 0.0);
-    glIndexi (RAMPSTART);
+    if (use_rgb) glColor3f(0.2, 1.0, 0.2); /* Green */
+    else glIndexi (RAMPSTART);
     auxSolidCone(1.0, 2.0);
     glPopMatrix ();
 
     glPushMatrix ();
     glTranslatef (1.0, -1.0, -3.5);
     glRotatef (-90.0, 1.0, 0.0, 0.0);
-    glIndexi (RAMPSTART);
+    if (use_rgb) glColor3f(0.2, 0.2, 1.0); /* Blue */
+    else glIndexi (RAMPSTART);
     auxSolidCone(1.0, 2.0);
     glPopMatrix ();
-    glFlush();
+    glFlush();
+    auxSwapBuffers();
 }
 
 void myReshape(int w, int h)
@@ -122,7 +172,14 @@ void myReshape(int w, int h)
  */
 int main(int argc, char** argv)
 {
-    auxInitDisplayMode (AUX_SINGLE | AUX_INDEX | AUX_DEPTH);
+    int i;
+    for (i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-rgb") == 0) {
+            use_rgb = 1;
+        }
+    }
+
+    auxInitDisplayMode (AUX_DOUBLE | (use_rgb ? AUX_RGB : AUX_INDEX) | AUX_DEPTH);
     auxInitPosition (0, 0, 200, 200);
     auxInitWindow (argv[0]);
     myinit();

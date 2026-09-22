@@ -664,7 +664,6 @@ static GLenum Key(int key, GLenum mask)
 
 static void Draw(void)
 {
-    float mapI[2], mapIA[2], mapIR[2];
     GLint i, j;
 
     glClear(GL_COLOR_BUFFER_BIT);
